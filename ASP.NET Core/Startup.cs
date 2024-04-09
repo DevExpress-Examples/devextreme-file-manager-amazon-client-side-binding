@@ -53,7 +53,6 @@ namespace ASP_NET_Core
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-            AzureStorageAccount.Load(Configuration.GetSection("AzureStorage"));
         }
     }
 }

@@ -18,74 +18,55 @@
         {
             permissions.Download(true);
             // uncomment the code below to enable file/folder management
-            // permissions.Create(true);
-            // permissions.Copy(true);
-            // permissions.Move(true);
-            // permissions.Delete(true);
-            // permissions.Rename(true);
-            // permissions.Upload(true);
+             permissions.Create(true);
+             permissions.Copy(true);
+             permissions.Move(true);
+             permissions.Delete(true);
+             permissions.Rename(true);
+             permissions.Upload(true);
         })
-        .Upload(upload => upload.MaxFileSize(1048576))
+        .Upload(upload => upload.MaxFileSize(600000))
         .AllowedFileExtensions(new string[0])
     )
 <div id="request-panel"></div>
-<script src="~/js/azure.gateway.js"></script>
-<script src="~/js/azure.filesystem.js"></script>
+<script src="~/js/amazon.gateway.js"></script>
+<script src="~/js/amazon.filesystem.js"></script>
 <script type="text/javascript">
-    function getItems(parentDirectory) {
-        return azure.getItems(parentDirectory.path);
-    }
 
-    function createDirectory(parentDirectory, name) {
-        return azure.createDirectory(parentDirectory.path, name);
-    }
+  baseUrl = `https://localhost:7128/api/AmazonS3`;
+  amazon = new AmazonFileSystem(baseUrl);
 
-    function renameItem(item, name) {
-        return item.isDirectory ? azure.renameDirectory(item.path, name) : azure.renameFile(item.path, name);
-    }
+function getItems(item) {
+  return amazon.getItems(item.key);
+}
 
-    function deleteItem(item) {
-        return item.isDirectory ? azure.deleteDirectory(item.path) : azure.deleteFile(item.path);
-    }
+function createDirectory(parentDirectory, name) {
+  return amazon.createDirectory(parentDirectory.key, name);
+}
 
-    function copyItem(item, destinationDirectory) {
-        var destinationPath = destinationDirectory.path ? destinationDirectory.path + "/" + item.name : item.name;
-        return item.isDirectory ? azure.copyDirectory(item.path, destinationPath) : azure.copyFile(item.path, destinationPath);
-    }
+function renameItem(item, name) {
+  return amazon.renameItem(item.key, item.parentPath, name);
+}
 
-    function moveItem(item, destinationDirectory) {
-        var destinationPath = destinationDirectory.path ? destinationDirectory.path + "/" + item.name : item.name;
-        return item.isDirectory ? azure.moveDirectory(item.path, destinationPath) : azure.moveFile(item.path, destinationPath);
-    }
+function deleteItem(item) {
+  return amazon.deleteItem(item.key);
+}
 
-    function uploadFileChunk(fileData, uploadInfo, destinationDirectory) {
-        var promise = null;
+function copyItem(item, destinationDirectory) {
+  return amazon.copyItem(item, destinationDirectory);
+}
 
-        if (uploadInfo.chunkIndex === 0) {
-            var filePath = destinationDirectory.path ? destinationDirectory.path + "/" + fileData.name : fileData.name;
-            promise = gateway.getUploadAccessUrl(filePath).then(function (accessUrls) {
-                uploadInfo.customData.accessUrl = accessUrls.url1;
-            });
-        } else {
-            promise = Promise.resolve();
-        }
+function moveItem(item, destinationDirectory) {
+  return amazon.moveItem(item, destinationDirectory);
+}
 
-        promise = promise.then(function () {
-            return gateway.putBlock(uploadInfo.customData.accessUrl, uploadInfo.chunkIndex, uploadInfo.chunkBlob);
-        });
+async function uploadFileChunk(fileData, uploadInfo, destinationDirectory) {
+  await amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+}
 
-        if (uploadInfo.chunkIndex === uploadInfo.chunkCount - 1) {
-            promise = promise.then(function () {
-                return gateway.putBlockList(uploadInfo.customData.accessUrl, uploadInfo.chunkCount);
-            });
-        }
-
-        return promise;
-    }
-
-    function downloadItems(items) {
-        azure.downloadFile(items[0].path);
-    }
+function downloadItems(items) {
+  return amazon.downloadItems(items);
+}
 
     function onRequestExecuted(e) {
         $("<div>").addClass("request-info").append(
@@ -104,7 +85,4 @@
         );
     }
 
-    var endpointUrl = '@Url.RouteUrl("FileManagerAzureAccessApi")';
-    var gateway = new AzureGateway(endpointUrl, onRequestExecuted);
-    var azure = new AzureFileSystem(gateway);
 </script>
