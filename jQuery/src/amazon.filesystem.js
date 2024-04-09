@@ -62,7 +62,7 @@ class AmazonFileSystem {
 
   async downloadItems(items) {
     const keys = items.map(x => x.key);
-    const fileName = keys.length > 0 ? "archive.zip" : keys[0];
+    const fileName = keys.length > 1 ? "archive.zip" : keys[0];
     try {
       const response = await this.gateway.downloadItems(keys);
       saveAs(new Blob([await response.blob()], { type: 'application/octet-stream' }), fileName);
