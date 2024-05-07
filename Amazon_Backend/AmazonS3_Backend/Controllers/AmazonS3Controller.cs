@@ -3,8 +3,9 @@ using AmazonS3_Backend.Interfaces;
 using AmazonS3_Backend.Models;
 using AmazonS3_Backend.Providers;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
 
-namespace WebApplication4.Controllers {
+namespace AmazonS3Backend.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     public class AmazonS3Controller : ControllerBase {
@@ -21,56 +22,56 @@ namespace WebApplication4.Controllers {
             try {
                 var items = await provider.GetItemsAsync(path);
                 return Ok(items);
-            } catch (AmazonS3Exception ex) {
-                return CreateErrorResult(ex.Message);
+            } catch (Exception ex) {
+                throw new Exception(ex.Message);
             }
         }
 
         [HttpPut("createDirectory")]
-        public async Task<ActionResult> CreateDirectory(string? path, string name) {
+        public async Task<IActionResult> CreateDirectory(string? path, string name) {
             try {
                 await provider.CreateDirectoryAsync(path, name);
-                return CreateSuccessResult();
+                return OkResult();
             } catch (AmazonS3Exception ex) {
-                return CreateErrorResult(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
         [HttpPut("renameItem")]
-        public async Task<ActionResult> RenameItem(string key, string? directory, string newName) {
+        public async Task<IActionResult> RenameItem(string key, string? directory, string newName) {
             try {
                 await provider.RenameItemAsync(key, directory, newName);
-                return CreateSuccessResult();
+                return OkResult();
             } catch (Exception ex) {
-                return CreateErrorResult(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
         [HttpPost("moveItem")]
-        public async Task<ActionResult> MoveItem(string sourceKey, string destinationKey) {
+        public async Task<IActionResult> MoveItem(string sourceKey, string destinationKey) {
             try {
                 await provider.MoveItemAsync(sourceKey, destinationKey);
-                return CreateSuccessResult();
+                return OkResult();
             } catch (Exception ex) {
-                return CreateErrorResult(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
         [HttpPost("deleteItem")]
-        public async Task<ActionResult> DeleteItem(string item) {
+        public async Task<IActionResult> DeleteItem(string item) {
             try {
                 await provider.DeleteItemAsync(item);
-                return CreateSuccessResult();
+                return OkResult();
             } catch (Exception ex) {
-                return CreateErrorResult(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
         [HttpPut("copyItem")]
-        public async Task<ActionResult> CopyItem(string sourceKey, string destinationKey) {
+        public async Task<IActionResult> CopyItem(string sourceKey, string destinationKey) {
             try {
                 await provider.CopyItemAsync(sourceKey, destinationKey);
-                return CreateSuccessResult();
+                return OkResult();
             } catch (Exception ex) {
-                return CreateErrorResult(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
         [HttpPost("downloadItems")]
@@ -79,7 +80,7 @@ namespace WebApplication4.Controllers {
                 var response = await provider.DownloadItemsAsync(keys);
                 return response;
             } catch (Exception ex) {
-                return CreateErrorResult(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
         [HttpPost("uploadFileChunk")]
@@ -112,20 +113,17 @@ namespace WebApplication4.Controllers {
                     await uploadService.CompleteUploadRequestAsync();
                 }
 
-                return CreateSuccessResult();
+                return OkResult();
             } catch (AmazonS3Exception ex) {
                 await uploadService.AbortCurrentUploadAsync(provider.Client);
-                return CreateErrorResult(ex.Message);
+                return StatusCode(500, ex.Message);
             } catch (Exception ex) {
-                return CreateErrorResult("An unexpected error occurred.");
+                return StatusCode(500, ex.Message);
             }
         }
 
-        ActionResult CreateSuccessResult() {
-            return Ok(new { success = true });
-        }
-        ActionResult CreateErrorResult(string message) {
-            return Ok(new { errorCode = 32767, errorText = message, success = false });
+        IActionResult OkResult() {
+            return Ok(new { });
         }
     }
 }

@@ -1,8 +1,7 @@
 import FileSystemItem from 'devextreme/file_management/file_system_item';
-import FileSystemError from 'devextreme/file_management/error';
+import UploadInfo from 'devextreme/file_management/upload_info';
 import { saveAs } from 'file-saver';
 
-import { FileEntry } from './app.service.types';
 import { AmazonGateway } from './amazon.gateway';
 
 export class AmazonFileSystem {
@@ -12,28 +11,30 @@ export class AmazonFileSystem {
     this.gateway = amazonGateway;
   }
 
-  getItems(key: string): Promise<FileSystemItem[]> {
-    return this.gateway.getItems(key) as Promise<FileSystemItem[]>;
+  async getItems(key: string): Promise<FileSystemItem[]> {
+    return await this.gateway.getItems(key) as Promise<FileSystemItem[]>;
   }
 
-  createDirectory(key: string, name: string): Promise<any> {
-    return this.gateway.createDirectory(key, name);
+  async createDirectory(key: string, name: string): Promise<any> {
+    return await this.gateway.createDirectory(key, name);
   }
 
-  renameItem(key: string, parentPath: string, name: string): Promise<any> {
-    return this.gateway.renameItem(key, `${parentPath}/`, name);
+  async renameItem(key: string, path: string, name: string, newName: string): Promise<any> {
+    const parentDirectory = path.replace(new RegExp(`${name}$`), '');
+    const parentPath = parentDirectory.endsWith('/') ? parentDirectory : `${parentDirectory}/`;
+    return await this.gateway.renameItem(key, parentPath, newName);
   }
 
-  deleteItem(key: string): Promise<any> {
-    return this.gateway.deleteItem(key);
+  async deleteItem(key: string): Promise<any> {
+    return await this.gateway.deleteItem(key);
   }
 
-  copyItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
-    return this.gateway.copyItem(item.key, `${destinationDirectory.key}${item.name}`);
+  async copyItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
+    return await this.gateway.copyItem(item.key, `${destinationDirectory.key}${item.name}`);
   }
 
-  moveItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
-    return this.gateway.moveItem(item.key, `${destinationDirectory.key}${item.name}`);
+  async moveItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
+    return await this.gateway.moveItem(item.key, `${destinationDirectory.key}${item.name}`);
   }
 
   async downloadItems(items: FileSystemItem[]): Promise<void> {
@@ -43,17 +44,12 @@ export class AmazonFileSystem {
       const response = await this.gateway.downloadItems(keys);
       let blob = await response.blob();
       saveAs(new Blob([blob], { type: 'application/octet-stream' }), fileName);
-    } catch (error) {
-      throw new Error(fileName);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 
-  uploadFileChunk(fileData: any, uploadInfo: any, destinationDirectory: any): any {
-    try {
-      return this.gateway.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
-    } catch (error) {
-      throw new Error(fileData.name);
-      // throw new DevExpress.fileManagement.FileSystemError(32767, fileData.name, error.message);
-    }
+  async uploadFileChunk(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
+    return await this.gateway.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
   }
 }

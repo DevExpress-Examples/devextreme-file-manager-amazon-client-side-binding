@@ -32,67 +32,68 @@ export class FileManagerService {
     this.fileSystemProvider = new CustomFileSystemProvider(options);
   }
 
-  getItems = (parentDirectory: FileSystemItem): Promise<FileSystemItem[]> => {
+  getItems = async (parentDirectory: FileSystemItem): Promise<FileSystemItem[]> => {
     try {
-      return this.amazon.getItems(parentDirectory.key);
+      return await this.amazon.getItems(parentDirectory.key);
     } catch (error: any) {
       throw new FileSystemError(32767, parentDirectory, error.message);
     }
   };
 
-  createDirectory = (parentDirectory: FileSystemItem, name: string): Promise<any> => {
+  createDirectory = async (parentDirectory: FileSystemItem, name: string): Promise<any> => {
     try {
-      return this.amazon.createDirectory(parentDirectory.key, name);
+      return await this.amazon.createDirectory(parentDirectory.key, name);
     } catch (error: any) {
       throw new FileSystemError(32767, parentDirectory, error.message);
     }
   };
 
-  renameItem = (item: FileSystemItem, name: string): Promise<any> => {
+  renameItem = async (item: FileSystemItem, name: string): Promise<any> => {
     try {
-      return this.amazon.renameItem(item.key, (item as any).parentPath, name);
+      return await this.amazon.renameItem(item.key, item.path, item.name, name);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
   };
 
-  deleteItem = (item: FileSystemItem): Promise<any> => {
+  deleteItem = async (item: FileSystemItem): Promise<any> => {
     try {
-      return this.amazon.deleteItem(item.key);
+      return await this.amazon.deleteItem(item.key);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
   };
 
-  copyItem = (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
+  copyItem = async (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
     try {
-      return this.amazon.copyItem(item, destinationDirectory);
+      return await this.amazon.copyItem(item, destinationDirectory);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
   };
 
-  moveItem = (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
+  moveItem = async (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
     try {
-      return this.amazon.moveItem(item, destinationDirectory);
+      return await this.amazon.moveItem(item, destinationDirectory);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
   };
 
-  uploadFileChunk = (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): void => {
+  uploadFileChunk = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
     try {
-      this.amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+      await this.amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
     } catch (error: any) {
       throw new FileSystemError(32767, destinationDirectory, error.message);
     }
   };
 
-  downloadItems = (items: FileSystemItem[]): Promise<void> => {
+  downloadItems = async (items: FileSystemItem[]): Promise<void> => {
     try {
-      return this.amazon.downloadItems(items);
+      return await this.amazon.downloadItems(items);
     } catch (error: any) {
-      throw new FileSystemError(32767, items[0], error.message);
+      const item = items.length > 1 ? undefined : items[0]; 
+      throw new FileSystemError(32767, item, error.message);
     }
   };
 }
