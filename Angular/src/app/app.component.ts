@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-
 import CustomFileSystemProvider from 'devextreme/file_management/custom_provider';
 import { Service } from './services/app.service';
 
@@ -17,11 +16,11 @@ export class AppComponent {
   requests: any[];
 
   constructor(service: Service) {
-    const endpointUrl = 'https://localhost:7049/api/file-manager-azure-access';
+    const endpointUrl = 'https://localhost:7128/api/AmazonS3';
     this.allowedFileExtensions = [];
 
     this.requests = [];
-    this.fileSystemProvider = service.getAzureFileSystemProvider(endpointUrl, this.onRequestExecuted);
+    this.fileSystemProvider = service.getAmazonFileSystemProvider(endpointUrl, this.onRequestExecuted);
   }
 
   onRequestExecuted = ({ method, urlPath, queryString }: { method: string; urlPath: string; queryString: string }): void => {

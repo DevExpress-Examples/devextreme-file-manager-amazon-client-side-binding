@@ -1,20 +1,23 @@
 import CustomFileSystemProvider from 'devextreme/file_management/custom_provider';
 import FileSystemItem from 'devextreme/file_management/file_system_item';
 import UploadInfo from 'devextreme/file_management/upload_info';
+import FileSystemError from 'devextreme/file_management/error';
+
 import { Injectable } from '@angular/core';
-import { AzureGateway } from './azure.gateway';
-import { AzureFileSystem } from './azure.filesystem';
+
+import { AmazonGateway } from './amazon.gateway';
+import { AmazonFileSystem } from './amazon.filesystem';
 
 export class FileManagerService {
   fileSystemProvider: CustomFileSystemProvider;
 
-  azure: AzureFileSystem;
+  amazon: AmazonFileSystem;
 
-  gateway: AzureGateway;
+  gateway: AmazonGateway;
 
   constructor(endpointUrl: string, onRequestExecuted?: Function) {
-    this.gateway = new AzureGateway(endpointUrl, onRequestExecuted);
-    this.azure = new AzureFileSystem(this.gateway);
+    this.gateway = new AmazonGateway(endpointUrl, onRequestExecuted);
+    this.amazon = new AmazonFileSystem(this.gateway);
 
     const options = {
       getItems: this.getItems,
@@ -29,53 +32,75 @@ export class FileManagerService {
     this.fileSystemProvider = new CustomFileSystemProvider(options);
   }
 
-  getItems = (parentDirectory: FileSystemItem): Promise<FileSystemItem[]> => this.azure.getItems(parentDirectory.path);
-
-  createDirectory = (parentDirectory: FileSystemItem, name: string): Promise<any> => this.azure.createDirectory(parentDirectory.path, name);
-
-  renameItem = (item: FileSystemItem, name: string): Promise<any> => (item.isDirectory ? this.azure.renameDirectory(item.path, name) : this.azure.renameFile(item.path, name));
-
-  deleteItem = (item: FileSystemItem): Promise<any> => (item.isDirectory ? this.azure.deleteDirectory(item.path) : this.azure.deleteFile(item.path));
-
-  copyItem = (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
-    const destinationPath = destinationDirectory.path ? `${destinationDirectory.path}/${item.name}` : item.name;
-    return item.isDirectory ? this.azure.copyDirectory(item.path, destinationPath) : this.azure.copyFile(item.path, destinationPath);
-  };
-
-  moveItem = (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
-    const destinationPath = destinationDirectory.path ? `${destinationDirectory.path}/${item.name}` : item.name;
-    return item.isDirectory ? this.azure.moveDirectory(item.path, destinationPath) : this.azure.moveFile(item.path, destinationPath);
-  };
-
-  uploadFileChunk = (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> => {
-    let promise = null;
-
-    if (uploadInfo.chunkIndex === 0) {
-      const filePath = destinationDirectory.path ? `${destinationDirectory.path}/${fileData.name}` : fileData.name;
-      promise = this.gateway.getUploadAccessUrl(filePath).then((accessUrls) => {
-        uploadInfo.customData.accessUrl = accessUrls.url1;
-      });
-    } else {
-      promise = Promise.resolve();
+  getItems = async (parentDirectory: FileSystemItem): Promise<FileSystemItem[]> => {
+    try {
+      return await this.amazon.getItems(parentDirectory.key);
+    } catch (error: any) {
+      throw new FileSystemError(32767, parentDirectory, error.message);
     }
-
-    promise = promise.then(() => this.gateway.putBlock(uploadInfo.customData.accessUrl, uploadInfo.chunkIndex, uploadInfo.chunkBlob));
-
-    if (uploadInfo.chunkIndex === uploadInfo.chunkCount - 1) {
-      promise = promise.then(() => this.gateway.putBlockList(uploadInfo.customData.accessUrl, uploadInfo.chunkCount));
-    }
-
-    return promise;
   };
 
-  downloadItems = (items: FileSystemItem[]): void => {
-    this.azure.downloadFile(items[0].path);
+  createDirectory = async (parentDirectory: FileSystemItem, name: string): Promise<any> => {
+    try {
+      return await this.amazon.createDirectory(parentDirectory.key, name);
+    } catch (error: any) {
+      throw new FileSystemError(32767, parentDirectory, error.message);
+    }
+  };
+
+  renameItem = async (item: FileSystemItem, name: string): Promise<any> => {
+    try {
+      return await this.amazon.renameItem(item.key, item.path, item.name, name);
+    } catch (error: any) {
+      throw new FileSystemError(32767, item, error.message);
+    }
+  };
+
+  deleteItem = async (item: FileSystemItem): Promise<any> => {
+    try {
+      return await this.amazon.deleteItem(item.key);
+    } catch (error: any) {
+      throw new FileSystemError(32767, item, error.message);
+    }
+  };
+
+  copyItem = async (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
+    try {
+      return await this.amazon.copyItem(item, destinationDirectory);
+    } catch (error: any) {
+      throw new FileSystemError(32767, item, error.message);
+    }
+  };
+
+  moveItem = async (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
+    try {
+      return await this.amazon.moveItem(item, destinationDirectory);
+    } catch (error: any) {
+      throw new FileSystemError(32767, item, error.message);
+    }
+  };
+
+  uploadFileChunk = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
+    try {
+      await this.amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+    } catch (error: any) {
+      throw new FileSystemError(32767, destinationDirectory, error.message);
+    }
+  };
+
+  downloadItems = async (items: FileSystemItem[]): Promise<void> => {
+    try {
+      return await this.amazon.downloadItems(items);
+    } catch (error: any) {
+      const item = items.length > 1 ? undefined : items[0]; 
+      throw new FileSystemError(32767, item, error.message);
+    }
   };
 }
 
 @Injectable()
 export class Service {
-  getAzureFileSystemProvider(endpointUrl: string, onRequestExecuted?: Function): CustomFileSystemProvider {
+  getAmazonFileSystemProvider(endpointUrl: string, onRequestExecuted?: Function): CustomFileSystemProvider {
     return new FileManagerService(endpointUrl, onRequestExecuted).fileSystemProvider;
   }
 }
