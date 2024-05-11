@@ -8,7 +8,7 @@ import {
 
 import 'devextreme/dist/css/dx.material.blue.light.compact.css';
 
-import { getAzureFileSystemProvider } from '../api/azure.custom.provider';
+import { getAmazonFileSystemProvider } from '../api/amazon.custom.provider';
 
 const requests: Ref<{ method: string; urlPath: string; queryString: string }[]> = ref([]);
 
@@ -18,10 +18,10 @@ const onRequestExecuted = (
   const request = { method, urlPath, queryString };
   requests.value = [request, ...requests.value];
 };
-const endpointUrl = 'https://localhost:7049/api/file-manager-azure-access';
+const endpointUrl = 'https://localhost:7128/api/AmazonS3';
 const allowedFileExtensions: string [] = [];
 
-const fileSystemProvider = getAzureFileSystemProvider(endpointUrl, onRequestExecuted);
+const fileSystemProvider = getAmazonFileSystemProvider(endpointUrl, onRequestExecuted);
 </script>
 <template>
   <div class="default-style">
@@ -30,16 +30,16 @@ const fileSystemProvider = getAzureFileSystemProvider(endpointUrl, onRequestExec
       :allowed-file-extensions="allowedFileExtensions"
     >
       <DxPermissions/>
-    <!-- uncomment the code below to enable file/directory management -->
-    <!-- <DxPermissions
-      :create="true"
-      :copy="true"
-      :move="true"
-      :delete="true"
-      :rename="true"
-      :upload="true"
-      :download="true"
-    /> -->
+      <!-- uncomment the code below to enable file/directory management -->
+      <DxPermissions
+        :create="true"
+        :copy="true"
+        :move="true"
+        :delete="true"
+        :rename="true"
+        :upload="true"
+        :download="true"
+      />
     </DxFileManager>
     <div id="request-panel">
       <div
