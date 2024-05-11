@@ -15,8 +15,8 @@ module.exports = {
     },
     globals: {
       System: false,
-      AzureGateway: false,
-      AzureFileSystem: false,
+      AmazonGateway: false,
+      AmazonFileSystem: false,
     },
   }]
 };
