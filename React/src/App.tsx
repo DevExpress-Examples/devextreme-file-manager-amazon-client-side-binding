@@ -4,7 +4,7 @@ import 'devextreme/dist/css/dx.material.blue.light.compact.css';
 
 import FileManager, { Permissions } from 'devextreme-react/file-manager';
 
-import { getAzureFileSystemProvider } from './api/azure.custom.provider';
+import { getAmazonFileSystemProvider } from './api/amazon.custom.provider';
 
 const allowedFileExtensions: string[] = [];
 
@@ -27,8 +27,8 @@ export default function App(): JSX.Element {
     },
     [],
   );
-  const fileSystemProvider = useMemo(() => getAzureFileSystemProvider(
-    'https://localhost:7049/api/file-manager-azure-access',
+  const fileSystemProvider = useMemo(() => getAmazonFileSystemProvider(
+    'https://localhost:7128/api/AmazonS3',
     onRequestExecuted,
   ), []);
 
@@ -41,15 +41,15 @@ export default function App(): JSX.Element {
       >
         <Permissions download={true}></Permissions>
         {/* uncomment the code below to enable file/directory management */}
-        {/* <Permissions
-              create={true}
-              copy={true}
-              move={true}
-              delete={true}
-              rename={true}
-              upload={true}
-              download={true}>
-            </Permissions> */}
+        <Permissions
+          create={true}
+          copy={true}
+          move={true}
+          delete={true}
+          rename={true}
+          upload={true}
+          download={true}>
+        </Permissions>
       </FileManager>
       <div id="request-panel">
         {requests.map((r, i) => (
