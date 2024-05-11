@@ -8,15 +8,22 @@ module.exports = {
       browser: true,
       es6: true
     },
+    rules: {
+      "space-before-function-paren": ["error", {
+        "anonymous": "never",
+        "named": "never",
+        "asyncArrow": "always"
+      }]
+    },
     parserOptions: {
       project: './tsconfig.json',
       'createDefaultProgram': true,
-      'ecmaVersion': 6,
+      'ecmaVersion': 8,
     },
     globals: {
       System: false,
-      AzureGateway: false,
-      AzureFileSystem: false,
+      AmazonGateway: false,
+      AmazonFileSystem: false,
     },
     settings: {
       react: {
