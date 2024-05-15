@@ -18,7 +18,7 @@ const onRequestExecuted = (
   const request = { method, urlPath, queryString };
   requests.value = [request, ...requests.value];
 };
-const endpointUrl = 'https://localhost:7128/api/AmazonS3';
+const endpointUrl = 'https://localhost:52366/api/AmazonS3';
 const allowedFileExtensions: string [] = [];
 
 const fileSystemProvider = getAmazonFileSystemProvider(endpointUrl, onRequestExecuted);
@@ -30,7 +30,6 @@ const fileSystemProvider = getAmazonFileSystemProvider(endpointUrl, onRequestExe
       :allowed-file-extensions="allowedFileExtensions"
     >
       <DxPermissions/>
-      <!-- uncomment the code below to enable file/directory management -->
       <DxPermissions
         :create="true"
         :copy="true"
