@@ -1,7 +1,8 @@
 class AmazonFileSystem {
   gateway = null;
-  constructor(baseUrl) {
-    this.gateway = new AmazonGateway(baseUrl)
+
+  constructor(baseUrl, onRequestExecuted) {
+    this.gateway = new AmazonGateway(baseUrl, onRequestExecuted);
   }
 
   async getItems(path) {
@@ -42,32 +43,48 @@ class AmazonFileSystem {
     } catch (error) {
       throw new DevExpress.fileManagement.FileSystemError(32767, item.key, error.message);
     }
-  };
-  
-  async moveItem(item, destinationDir){
-    try { 
+  }
+
+  async moveItem(item, destinationDir) {
+    try {
       return await this.gateway.moveItem(item.key, `${destinationDir.key}${item.name}`);
     } catch (error) {
       throw new DevExpress.fileManagement.FileSystemError(32767, item.key, error.message);
     }
-  };
+  }
 
-  async uploadFileChunk(fileData, uploadInfo, destinationDirectory){
+  async uploadFileChunk(fileData, uploadInfo, destinationDirectory) {
     try {
-      return await this.gateway.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+      if (uploadInfo.chunkIndex === 0) {
+        await this.gateway.initUpload(fileData, destinationDirectory);
+      }
+
+      await this.gateway.uploadPart(fileData, uploadInfo, destinationDirectory);
+
+      if (uploadInfo.chunkCount === uploadInfo.chunkIndex + 1) {
+        await this.gateway.completeUpload(fileData, uploadInfo, destinationDirectory);
+      }
     } catch (error) {
       throw new DevExpress.fileManagement.FileSystemError(32767, fileData.name, error.message);
     }
   }
 
+  getFileNameFromKey(key) {
+    const index = key.lastIndexOf('/');
+    if (index === -1) {
+      return key;
+    }
+    return key.substring(index + 1);
+  }
+
   async downloadItems(items) {
-    const keys = items.map(x => x.key);
-    const fileName = keys.length > 1 ? "archive.zip" : keys[0];
+    const keys = items.map((x) => x.key);
+    const fileName = keys.length > 1 ? 'archive.zip' : this.getFileNameFromKey(keys[0]);
     try {
-      const response = await this.gateway.downloadItems(keys);
-      saveAs(new Blob([await response.blob()], { type: 'application/octet-stream' }), fileName);
-      } catch (error) {
-        throw new DevExpress.fileManagement.FileSystemError(32767, fileName, error.message);
-      }
+      const blob = await this.gateway.downloadItems(keys);
+      saveAs(new Blob([blob], { type: 'application/octet-stream' }), fileName);
+    } catch (error) {
+      throw new DevExpress.fileManagement.FileSystemError(32767, fileName, error.message);
+    }
   }
 }

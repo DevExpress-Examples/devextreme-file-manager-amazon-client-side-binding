@@ -16,8 +16,7 @@
         )
         .Permissions(permissions =>
         {
-            permissions.Download(true);
-            // uncomment the code below to enable file/folder management
+             permissions.Download(true);
              permissions.Create(true);
              permissions.Copy(true);
              permissions.Move(true);
@@ -25,7 +24,7 @@
              permissions.Rename(true);
              permissions.Upload(true);
         })
-        .Upload(upload => upload.MaxFileSize(600000))
+        .Upload(upload => upload.ChunkSize(600000))
         .AllowedFileExtensions(new string[0])
     )
 <div id="request-panel"></div>
@@ -33,8 +32,8 @@
 <script src="~/js/amazon.filesystem.js"></script>
 <script type="text/javascript">
 
-  baseUrl = `https://localhost:7128/api/AmazonS3`;
-  amazon = new AmazonFileSystem(baseUrl);
+  baseUrl = `https://localhost:52366/api/AmazonS3`;
+  amazon = new AmazonFileSystem(baseUrl, onRequestExecuted);
 
 function getItems(item) {
   return amazon.getItems(item.key);
