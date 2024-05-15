@@ -16,25 +16,25 @@ export class AmazonFileSystem {
   }
 
   async createDirectory(key: string, name: string): Promise<any> {
-    return await this.gateway.createDirectory(key, name);
+    return this.gateway.createDirectory(key, name);
   }
 
   async renameItem(key: string, path: string, name: string, newName: string): Promise<any> {
     const parentDirectory = path.replace(new RegExp(`${name}$`), '');
     const parentPath = parentDirectory.endsWith('/') ? parentDirectory : `${parentDirectory}/`;
-    return await this.gateway.renameItem(key, parentPath, newName);
+    return this.gateway.renameItem(key, parentPath, newName);
   }
 
   async deleteItem(key: string): Promise<any> {
-    return await this.gateway.deleteItem(key);
+    return this.gateway.deleteItem(key);
   }
 
   async copyItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
-    return await this.gateway.copyItem(item.key, `${destinationDirectory.key}${item.name}`);
+    return this.gateway.copyItem(item.key, `${destinationDirectory.key}${item.name}`);
   }
 
   async moveItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
-    return await this.gateway.moveItem(item.key, `${destinationDirectory.key}${item.name}`);
+    return this.gateway.moveItem(item.key, `${destinationDirectory.key}${item.name}`);
   }
 
   async downloadItems(items: FileSystemItem[]): Promise<void> {
@@ -47,7 +47,7 @@ export class AmazonFileSystem {
       throw new Error(error.message);
     }
   }
-  
+
   getFileNameFromKey(key: string): string {
     const index = key.lastIndexOf('/');
     if (index === -1) {

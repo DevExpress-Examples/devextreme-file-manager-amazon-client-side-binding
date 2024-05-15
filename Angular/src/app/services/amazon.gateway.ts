@@ -1,45 +1,53 @@
 import FileSystemItem from 'devextreme/file_management/file_system_item';
 import UploadInfo from 'devextreme/file_management/upload_info';
+import { UploadData, Part } from './app.service.types';
 
 export class AmazonGateway {
   endpointUrl: string;
-  uploadData: any;
+
+  uploadData: UploadData[];
+
   onRequestExecuted: Function | undefined;
+
   defaultHeaders: any = { 'Content-Type': 'application/json' };
 
   constructor(endpointUrl: string, onRequestExecuted?: Function) {
     this.endpointUrl = endpointUrl;
     this.onRequestExecuted = onRequestExecuted;
-    this.uploadData = {}; 
+    this.uploadData = [];
   }
 
   getRequestUrl(methodName: string): string {
     return `${this.endpointUrl}/${methodName}`;
   }
+
   removeUploadData(fileName: string): void {
-    delete this.uploadData[fileName];
+    const index = this.uploadData.findIndex((data) => data.key === fileName);
+    if (index !== -1) {
+      this.uploadData.splice(index, 1);
+    }
   }
 
   initUploadData(fileName: string, uploadId: string): void {
-    this.uploadData[fileName] = { uploadId, parts: [] };
+    this.uploadData.push({ key: fileName, uploadId, parts: [] });
   }
 
-  addPartToUploadData(fileName: string, part: object): void {
-    this.uploadData[fileName].parts.push(part);
+  addPartToUploadData(fileName: string, part: Part): void {
+    this.uploadData.find((x) => x.key == fileName)?.parts.push(part);
   }
 
-  getUploadId(fileName: string): string {
-    return this.uploadData[fileName].uploadId;
+  getUploadId(fileName: string): string | undefined {
+    return this.uploadData.find((x) => x.key == fileName)?.uploadId;
   }
 
-  getParts(fileName: string): any {
-    return this.uploadData[fileName].parts;
+  getParts(fileName: string): Part[] | undefined {
+    return this.uploadData.find((x) => x.key == fileName)?.parts;
   }
 
   async getItems(path: string): Promise<any> {
     const params = { path };
     const requestParams = { method: 'GET' };
-    return await this.makeRequestAsync('getItems', params, requestParams);
+    return this.makeRequestAsync('getItems', params, requestParams);
   }
 
   async createDirectory(path: string, name: string): Promise<void> {
@@ -49,25 +57,25 @@ export class AmazonGateway {
   }
 
   async renameItem(key: string, parentPath: string, name: string): Promise<any> {
-    const params = { 'key': key, 'directory': parentPath, 'newName': name };
+    const params = { key, directory: parentPath, newName: name };
     const requestParams = { method: 'PUT' };
     await this.makeRequestAsync('renameItem', params, requestParams);
   }
 
   async deleteItem(key: string): Promise<any> {
-    const params = { 'item': key };
+    const params = { item: key };
     const requestParams = { method: 'POST' };
     await this.makeRequestAsync('deleteItem', params, requestParams);
   }
 
   async copyItem(sourceKey: string, destinationKey: string): Promise<any> {
-    const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
+    const params = { sourceKey, destinationKey };
     const requestParams = { method: 'PUT' };
     await this.makeRequestAsync('copyItem', params, requestParams);
   }
 
   async moveItem(sourceKey: string, destinationKey: string): Promise<any> {
-    const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
+    const params = { sourceKey, destinationKey };
     const requestParams = { method: 'POST' };
     await this.makeRequestAsync('moveItem', params, requestParams);
   }
@@ -85,7 +93,7 @@ export class AmazonGateway {
     const data = new FormData();
     data.append('part', uploadInfo.chunkBlob);
     data.append('fileName', key);
-    data.append('uploadId', this.getUploadId(key));
+    data.append('uploadId', `${this.getUploadId(key)}`);
     data.append('partNumber', `${uploadInfo.chunkIndex}`);
     data.append('partSize', `${uploadInfo.chunkBlob.size}`);
 
@@ -146,7 +154,7 @@ export class AmazonGateway {
       throw new Error(errorMessage);
     }
     const contentDisposition = response.headers.get('Content-Disposition');
-    if (contentDisposition && contentDisposition.includes('attachment')) {
+    if (contentDisposition?.includes('attachment')) {
       // processing downloadItems request
       return response.blob();
     }
