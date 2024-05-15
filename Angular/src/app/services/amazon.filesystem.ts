@@ -38,18 +38,37 @@ export class AmazonFileSystem {
   }
 
   async downloadItems(items: FileSystemItem[]): Promise<void> {
-    const keys = items.map((x: FileSystemItem) => x.key);
-    const fileName = keys.length > 1 ? 'archive.zip' : keys[0];
+    const keys = items.map((x) => x.key);
+    const fileName = keys.length > 1 ? 'archive.zip' : this.getFileNameFromKey(keys[0]);
     try {
-      const response = await this.gateway.downloadItems(keys);
-      let blob = await response.blob();
+      const blob = await this.gateway.downloadItems(keys);
       saveAs(new Blob([blob], { type: 'application/octet-stream' }), fileName);
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
+  
+  getFileNameFromKey(key: string): string {
+    const index = key.lastIndexOf('/');
+    if (index === -1) {
+      return key;
+    }
+    return key.substring(index + 1);
+  }
 
   async uploadFileChunk(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
-    return await this.gateway.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+    try {
+      if (uploadInfo.chunkIndex === 0) {
+        await this.gateway.initUpload(fileData, destinationDirectory);
+      }
+
+      await this.gateway.uploadPart(fileData, uploadInfo, destinationDirectory);
+
+      if (uploadInfo.chunkCount === uploadInfo.chunkIndex + 1) {
+        await this.gateway.completeUpload(fileData, uploadInfo, destinationDirectory);
+      }
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
   }
 }

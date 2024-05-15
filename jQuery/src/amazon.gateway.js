@@ -58,13 +58,13 @@ class AmazonGateway {
   async copyItem(sourceKey, destinationKey) {
     const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
     const requestParams = { method: 'PUT' };
-    await this.makeRequestAsync('deleteItem', params, requestParams);
+    await this.makeRequestAsync('copyItem', params, requestParams);
   }
 
   async moveItem(sourceKey, destinationKey) {
     const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
     const requestParams = { method: 'POST' };
-    await this.makeRequestAsync('deleteItem', params, requestParams);
+    await this.makeRequestAsync('moveItem', params, requestParams);
   }
 
   async downloadItems(keys) {

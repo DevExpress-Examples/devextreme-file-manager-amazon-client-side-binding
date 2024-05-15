@@ -16,7 +16,7 @@ export class AppComponent {
   requests: any[];
 
   constructor(service: Service) {
-    const endpointUrl = 'https://localhost:7128/api/AmazonS3';
+    const endpointUrl = 'https://localhost:52366/api/AmazonS3';
     this.allowedFileExtensions = [];
 
     this.requests = [];
