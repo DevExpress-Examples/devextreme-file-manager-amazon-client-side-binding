@@ -16,40 +16,59 @@ export class AmazonFileSystem {
   }
 
   async createDirectory(key: string, name: string): Promise<any> {
-    return await this.gateway.createDirectory(key, name);
+    return this.gateway.createDirectory(key, name);
   }
 
   async renameItem(key: string, path: string, name: string, newName: string): Promise<any> {
     const parentDirectory = path.replace(new RegExp(`${name}$`), '');
     const parentPath = parentDirectory.endsWith('/') ? parentDirectory : `${parentDirectory}/`;
-    return await this.gateway.renameItem(key, parentPath, newName);
+    return this.gateway.renameItem(key, parentPath, newName);
   }
 
   async deleteItem(key: string): Promise<any> {
-    return await this.gateway.deleteItem(key);
+    return this.gateway.deleteItem(key);
   }
 
   async copyItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
-    return await this.gateway.copyItem(item.key, `${destinationDirectory.key}${item.name}`);
+    return this.gateway.copyItem(item.key, `${destinationDirectory.key}${item.name}`);
   }
 
   async moveItem(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> {
-    return await this.gateway.moveItem(item.key, `${destinationDirectory.key}${item.name}`);
+    return this.gateway.moveItem(item.key, `${destinationDirectory.key}${item.name}`);
   }
 
   async downloadItems(items: FileSystemItem[]): Promise<void> {
-    const keys = items.map((x: FileSystemItem) => x.key);
-    const fileName = keys.length > 1 ? 'archive.zip' : keys[0];
+    const keys = items.map((x) => x.key);
+    const fileName = keys.length > 1 ? 'archive.zip' : this.getFileNameFromKey(keys[0]);
     try {
-      const response = await this.gateway.downloadItems(keys);
-      let blob = await response.blob();
+      const blob = await this.gateway.downloadItems(keys);
       saveAs(new Blob([blob], { type: 'application/octet-stream' }), fileName);
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
 
+  getFileNameFromKey(key: string): string {
+    const index = key.lastIndexOf('/');
+    if (index === -1) {
+      return key;
+    }
+    return key.substring(index + 1);
+  }
+
   async uploadFileChunk(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
-    return await this.gateway.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+    try {
+      if (uploadInfo.chunkIndex === 0) {
+        await this.gateway.initUpload(fileData, destinationDirectory);
+      }
+
+      await this.gateway.uploadPart(fileData, uploadInfo, destinationDirectory);
+
+      if (uploadInfo.chunkCount === uploadInfo.chunkIndex + 1) {
+        await this.gateway.completeUpload(fileData, uploadInfo, destinationDirectory);
+      }
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
   }
 }

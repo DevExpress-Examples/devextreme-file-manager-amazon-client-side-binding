@@ -40,7 +40,7 @@ export class AmazonCustomProvider {
 
   createDirectory = async(parentDirectory: FileSystemItem, name: string): Promise<any> => {
     try {
-      return await this.amazon.createDirectory(parentDirectory.key, name);
+      await this.amazon.createDirectory(parentDirectory.key, name);
     } catch (error: any) {
       throw new FileSystemError(32767, parentDirectory, error.message);
     }
@@ -48,7 +48,7 @@ export class AmazonCustomProvider {
 
   renameItem = async(item: FileSystemItem, name: string): Promise<any> => {
     try {
-      return await this.amazon.renameItem(item.key, item.path, item.name, name);
+      await this.amazon.renameItem(item.key, item.path, item.name, name);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -56,7 +56,7 @@ export class AmazonCustomProvider {
 
   deleteItem = async(item: FileSystemItem): Promise<any> => {
     try {
-      return await this.amazon.deleteItem(item.key);
+      await this.amazon.deleteItem(item.key);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -64,7 +64,7 @@ export class AmazonCustomProvider {
 
   copyItem = async(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
     try {
-      return await this.amazon.copyItem(item, destinationDirectory);
+      await this.amazon.copyItem(item, destinationDirectory);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -72,7 +72,7 @@ export class AmazonCustomProvider {
 
   moveItem = async(item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
     try {
-      return await this.amazon.moveItem(item, destinationDirectory);
+      await this.amazon.moveItem(item, destinationDirectory);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -88,7 +88,7 @@ export class AmazonCustomProvider {
 
   downloadItems = async(items: FileSystemItem[]): Promise<void> => {
     try {
-      return await this.amazon.downloadItems(items);
+      await this.amazon.downloadItems(items);
     } catch (error: any) {
       const item = items.length > 1 ? undefined : items[0];
       throw new FileSystemError(32767, item, error.message);
@@ -96,10 +96,7 @@ export class AmazonCustomProvider {
   };
 }
 
-export function getAmazonFileSystemProvider(
-  endpointUrl: string,
-  onRequestExecuted?: Function
-): CustomFileSystemProvider {
-  return new AmazonCustomProvider(endpointUrl, onRequestExecuted)
-    .fileSystemProvider;
+/* eslint-disable-next-line vue/max-len */
+export function getAmazonFileSystemProvider(endpointUrl: string, onRequestExecuted?: Function): CustomFileSystemProvider {
+  return new AmazonCustomProvider(endpointUrl, onRequestExecuted).fileSystemProvider;
 }

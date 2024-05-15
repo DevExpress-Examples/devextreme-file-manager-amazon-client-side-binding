@@ -1,6 +1,6 @@
 $(() => {
-  baseUrl = `https://localhost:7128/api/AmazonS3`;
-  amazon = new AmazonFileSystem(baseUrl);
+  baseUrl = 'https://localhost:52366/api/AmazonS3';
+  amazon = new AmazonFileSystem(baseUrl, onRequestExecuted);
 
   const provider = new DevExpress.fileManagement.CustomFileSystemProvider({
     getItems,
@@ -15,11 +15,11 @@ $(() => {
 
   $('#file-manager').dxFileManager({
     fileSystemProvider: provider,
-    
+
     allowedFileExtensions: [],
     upload: {
-      //maxFileSize: 1048576,
-      chunkSize: 6000000, // With multi part upload, the size of a chunk should be greater or equal to 5 MB 
+      // maxFileSize: 1048576,
+      chunkSize: 6000000,
     },
     permissions: {
       download: true,
