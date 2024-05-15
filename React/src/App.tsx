@@ -28,7 +28,7 @@ export default function App(): JSX.Element {
     [],
   );
   const fileSystemProvider = useMemo(() => getAmazonFileSystemProvider(
-    'https://localhost:7128/api/AmazonS3',
+    'https://localhost:52366/api/AmazonS3',
     onRequestExecuted,
   ), []);
 

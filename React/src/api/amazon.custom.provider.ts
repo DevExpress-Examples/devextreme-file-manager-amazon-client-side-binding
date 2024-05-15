@@ -40,7 +40,7 @@ export class AmazonCustomProvider {
 
   createDirectory = async (parentDirectory: FileSystemItem, name: string): Promise<any> => {
     try {
-      return await this.amazon.createDirectory(parentDirectory.key, name) as unknown;
+      await this.amazon.createDirectory(parentDirectory.key, name);
     } catch (error: any) {
       throw new FileSystemError(32767, parentDirectory, error.message);
     }
@@ -48,7 +48,7 @@ export class AmazonCustomProvider {
 
   renameItem = async (item: FileSystemItem, name: string): Promise<any> => {
     try {
-      return await this.amazon.renameItem(item.key, item.path, item.name, name) as unknown;
+      await this.amazon.renameItem(item.key, item.path, item.name, name);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -56,7 +56,7 @@ export class AmazonCustomProvider {
 
   deleteItem = async (item: FileSystemItem): Promise<any> => {
     try {
-      return await this.amazon.deleteItem(item.key) as unknown;
+      await this.amazon.deleteItem(item.key);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -64,7 +64,7 @@ export class AmazonCustomProvider {
 
   copyItem = async (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
     try {
-      return await this.amazon.copyItem(item, destinationDirectory) as unknown;
+      await this.amazon.copyItem(item, destinationDirectory);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -72,7 +72,7 @@ export class AmazonCustomProvider {
 
   moveItem = async (item: FileSystemItem, destinationDirectory: FileSystemItem): Promise<any> => {
     try {
-      return await this.amazon.moveItem(item, destinationDirectory) as unknown;
+      await this.amazon.moveItem(item, destinationDirectory);
     } catch (error: any) {
       throw new FileSystemError(32767, item, error.message);
     }
@@ -88,7 +88,7 @@ export class AmazonCustomProvider {
 
   downloadItems = async (items: FileSystemItem[]): Promise<void> => {
     try {
-      return await this.amazon.downloadItems(items);
+      await this.amazon.downloadItems(items);
     } catch (error: any) {
       const item = items.length > 1 ? undefined : items[0];
       throw new FileSystemError(32767, item, error.message);
