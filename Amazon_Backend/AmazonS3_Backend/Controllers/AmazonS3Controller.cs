@@ -1,20 +1,15 @@
 ﻿using Amazon.S3;
-using AmazonS3_Backend.Interfaces;
-using AmazonS3_Backend.Models;
+using Amazon.S3.Model;
 using AmazonS3_Backend.Providers;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
 
 namespace AmazonS3Backend.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     public class AmazonS3Controller : ControllerBase {
         AmazonS3Provider provider;
-        IAmazonS3FileUploadService uploadService;
-        
-        public AmazonS3Controller(IAmazonS3 client, IAmazonS3FileUploadService service) {
-            uploadService = service;
-            provider = new AmazonS3Provider(client, "test-devexpress-bucket");
+        public AmazonS3Controller(IAmazonS3 client) {
+            provider = new AmazonS3Provider(client, Program.BucketName);
         }
 
         [HttpGet("getItems")]
@@ -31,7 +26,7 @@ namespace AmazonS3Backend.Controllers {
         public async Task<IActionResult> CreateDirectory(string? path, string name) {
             try {
                 await provider.CreateDirectoryAsync(path, name);
-                return OkResult();
+                return Ok();
             } catch (AmazonS3Exception ex) {
                 return StatusCode(500, ex.Message);
             }
@@ -40,7 +35,7 @@ namespace AmazonS3Backend.Controllers {
         public async Task<IActionResult> RenameItem(string key, string? directory, string newName) {
             try {
                 await provider.RenameItemAsync(key, directory, newName);
-                return OkResult();
+                return Ok();
             } catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
@@ -50,7 +45,7 @@ namespace AmazonS3Backend.Controllers {
         public async Task<IActionResult> MoveItem(string sourceKey, string destinationKey) {
             try {
                 await provider.MoveItemAsync(sourceKey, destinationKey);
-                return OkResult();
+                return Ok();
             } catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
@@ -60,7 +55,7 @@ namespace AmazonS3Backend.Controllers {
         public async Task<IActionResult> DeleteItem(string item) {
             try {
                 await provider.DeleteItemAsync(item);
-                return OkResult();
+                return Ok();
             } catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
@@ -69,61 +64,75 @@ namespace AmazonS3Backend.Controllers {
         public async Task<IActionResult> CopyItem(string sourceKey, string destinationKey) {
             try {
                 await provider.CopyItemAsync(sourceKey, destinationKey);
-                return OkResult();
+                return Ok();
             } catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
         }
         [HttpPost("downloadItems")]
-        public async Task<object> DownloadItems([FromBody] string[] keys) {
+        public async Task<IActionResult> DownloadItems([FromBody] string[] keys) {
             try {
                 var response = await provider.DownloadItemsAsync(keys);
+                // returning file with Content-Disposition header exposed
                 return response;
             } catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpPost("uploadFileChunk")]
-        public async Task<IActionResult> UploadFileChunk([FromForm] UploadFileChunkRequestModel model) {
+
+        [HttpPost("initUpload")]
+        public async Task<IActionResult> InitUpload(string key) {
             try {
-                if (model == null || model.File == null || string.IsNullOrEmpty(model.FileName) ||
-                    string.IsNullOrEmpty(model.FileSize) || string.IsNullOrEmpty(model.DirectoryPath)) {
-                    return BadRequest("Invalid request parameters.");
-                }
-
-                if (!int.TryParse(model.FileSize, out int fileSize)) {
-                    return BadRequest("Invalid file size.");
-                }
-
-                if (model.ChunkNumber < 0 || model.ChunkNumber > model.ChunkCount) {
-                    return BadRequest("Invalid chunk number.");
-                }
-
-                if (model.ChunkNumber == 0) {
-                    await uploadService.InitializeUploadRequestAsync(provider.Client, provider.BucketName, $"{model.DirectoryPath}{model.FileName}");
-                }
-
-                if (model.ChunkNumber <= model.ChunkCount) {
-                    using (var stream = model.File.OpenReadStream()) {
-                        await uploadService.UploadDataChunkAsync(model.ChunkNumber, fileSize, stream);
-                    }
-                }
-
-                if (model.ChunkCount - 1 == model.ChunkNumber) {
-                    await uploadService.CompleteUploadRequestAsync();
-                }
-
-                return OkResult();
-            } catch (AmazonS3Exception ex) {
-                await uploadService.AbortCurrentUploadAsync(provider.Client);
-                return StatusCode(500, ex.Message);
+                var uploadId = await provider.InitUploadAsync(key);
+                return Ok(uploadId);
             } catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }
         }
 
-        IActionResult OkResult() {
-            return Ok(new { });
+        [HttpPost("getPresignedUrl")]
+        public async Task<IActionResult> GetPresignedUrl(string uploadId, string key, int partNumber) {
+            try {
+                var presignedUrl = await provider.GetPresignedUrlAsync(uploadId, key, partNumber);
+                return Ok(presignedUrl);
+            } catch (Exception ex) {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("uploadPart")]
+        public async Task<IActionResult> UploadPart([FromForm] IFormFile part, [FromForm] int partNumber, [FromForm] long partSize, [FromForm] string fileName, [FromForm] string uploadId) {
+            try {
+                using (var filePart = part.OpenReadStream()) {
+                    var response = await provider.UploadPartAsync(filePart, partNumber, partSize, fileName, uploadId);
+                    // returning result with ETag header exposed
+                    return Ok(response.ETag);
+                }
+            } catch (Exception ex) {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("completeUpload")]
+        public async Task<IActionResult> CompleteUpload([FromBody] List<PartETag> parts, string key, string uploadId) {
+            try {
+                var response = await provider.CompleteUploadAsync(key, uploadId, parts);
+                // use response if you need to pass ETag or something else when upload is finished
+                return Ok(response.ETag);
+            } catch (Exception ex) {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("abortUpload")]
+        public async Task<IActionResult> AbortUpload(string uploadId) {
+            try {
+                var response = await provider.AbortUploadAsync(uploadId);
+                // user response if you need to pass something to the client after aborting upload
+                return Ok(response.HttpStatusCode);
+            } catch (Exception ex) {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

@@ -55,15 +55,7 @@ namespace AmazonS3_Backend.Providers {
                 throw new Exception(ex.Message);
             }
         }
-        string GetDestinationKey(string itemKey, string? destinationDirectory) {
-            if (string.IsNullOrEmpty(itemKey)) {
-                throw new ArgumentException($"Item key cannot be null or empty");
-            }
-            if (string.IsNullOrEmpty(destinationDirectory)) {
-                return $"{GetName(itemKey)}";
-            }
-            return $"{destinationDirectory}{GetName(itemKey)}";
-        }
+
         public async Task CreateDirectoryAsync(string? path, string name) {
             var request = new PutObjectRequest {
                 BucketName = BucketName,
@@ -149,7 +141,7 @@ namespace AmazonS3_Backend.Providers {
         public async Task<FileContentResult> DownloadSingleFile(string key) {
             var request = new GetObjectRequest {
                 BucketName = BucketName,
-                Key = GetName(key)
+                Key = key
             };
 
             using (var response = await Client.GetObjectAsync(request)) {
@@ -234,6 +226,21 @@ namespace AmazonS3_Backend.Providers {
             }
             return result;
         }
+        public async Task<string> GetPresignedUrl(string key, int expirationSeconds) {
+            DateTime expiration = DateTime.UtcNow.AddSeconds(expirationSeconds);
+            
+            GetPreSignedUrlRequest request = new GetPreSignedUrlRequest {
+                BucketName = BucketName,
+                //Key = key,
+                
+                Verb = HttpVerb.PUT,
+                Expires = expiration,
+                
+            };
+
+            return await Client.GetPreSignedURLAsync(request);
+        }
+
         public async Task<bool> HasDirectorySubDirectoriesAsync(string key) {
             try {
                 var request = new ListObjectsV2Request {
@@ -270,6 +277,58 @@ namespace AmazonS3_Backend.Providers {
 
         string GetName(string key) {
             return key.Substring(key.LastIndexOf(Delimiter) + 1);
+        }
+        public async Task<UploadPartResponse> UploadPartAsync(Stream part, int partNumber, long partSize, string fileName, string uploadId) {
+            using (part) {
+                UploadPartRequest uploadRequest = new UploadPartRequest {
+                    BucketName = BucketName,
+                    Key = fileName,
+                    UploadId = uploadId,
+                    PartNumber = partNumber + 1,
+                    PartSize = partSize,
+                    InputStream = part
+                };
+                return await Client.UploadPartAsync(uploadRequest);
+            }
+        }
+        public async Task<string> InitUploadAsync(string key) {
+            var request = new InitiateMultipartUploadRequest() {
+                Key = key,
+                BucketName = BucketName
+            };
+            var response = await Client.InitiateMultipartUploadAsync(request);
+            return response.UploadId;
+        }
+        public async Task<string> GetPresignedUrlAsync(string uploadId, string key, int partNumber) {
+            GetPreSignedUrlRequest request = new GetPreSignedUrlRequest {
+                BucketName = BucketName,
+                Key = key,
+                Verb = HttpVerb.PUT,
+                // Uncomment if you need to change the expiration time. The default is 15 Minutes
+                //Expires = DateTime.UtcNow.AddSeconds(300),
+                UploadId = uploadId,
+                // Part numbers can be any number from 1 to 10,000, inclusive.
+                // https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPart.html
+                PartNumber = partNumber + 1
+            };
+
+            return await Client.GetPreSignedURLAsync(request);
+        }
+        public async Task<CompleteMultipartUploadResponse> CompleteUploadAsync(string key, string uploadId, List<PartETag> parts) {
+            var request = new CompleteMultipartUploadRequest() {
+                BucketName = BucketName,
+                Key = key,
+                UploadId = uploadId,
+                PartETags = parts
+            };
+            return await Client.CompleteMultipartUploadAsync(request);
+        }
+
+        public async Task<AbortMultipartUploadResponse> AbortUploadAsync(string uploadId) {
+            var request = new AbortMultipartUploadRequest() {
+                UploadId = uploadId
+            };
+            return await Client.AbortMultipartUploadAsync(request);
         }
     }
 }

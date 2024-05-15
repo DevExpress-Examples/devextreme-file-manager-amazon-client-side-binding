@@ -1,105 +1,156 @@
 class AmazonGateway {
-    baseUrl = '';
-  
-    constructor(baseUrl){
-        this.baseUrl = baseUrl;
-    }
-  
-    getRequestUrl(methodName){
-        return `${this.baseUrl}/${methodName}`;
-    }
-  
-    async getItems(key){
-        const params = { 'path': key };
-        return this.makeRequest(this.getRequestUrl('getItems'), params);
-    }
-  
-    async renameItem(key, parentPath, name){
-        const params = { 'key': key, 'directory': parentPath, 'newName': name };
-        return this.makeRequest(this.getRequestUrl('renameItem'), params, 'PUT');
-    }
-  
-    async createDirectory(key, name){
-        const params = { 'path': key, 'name': name };
-        return this.makeRequest(this.getRequestUrl('createDirectory'), params, 'PUT');
-    }
-  
-    async deleteItem(key){
-        const params = { 'item': key };
-        return this.makeRequest(this.getRequestUrl('deleteItem'), params, 'POST');
-    }
-  
-    async copyItem(sourceKey, destinationKey){
-        const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
-        return this.makeRequest(this.getRequestUrl('copyItem'), params, 'PUT');
-    }
-  
-    async moveItem(sourceKey, destinationKey){
-        const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
-        return this.makeRequest(this.getRequestUrl('moveItem'), params, 'POST');
-    }
-  
-    async downloadItems(keys){
-        return this.makeRequest(this.getRequestUrl('downloadItems'), {}, 'POST', {}, keys);
-    }
-  
-    async uploadFileChunk(fileData, uploadInfo, destinationDirectory) {
-       const formData = new FormData();
-       formData.append('file', uploadInfo.chunkBlob);
-       formData.append('fileName', fileData.name);
-       formData.append('fileSize', fileData.size);
-       formData.append('directoryPath', destinationDirectory.key);
-       formData.append('chunkNumber', uploadInfo.chunkIndex);
-       formData.append('chunkCount', uploadInfo.chunkCount);
-       
-       try {
-           const response = await fetch(`${this.baseUrl}/uploadFileChunk`, {
-               method: 'POST',
-               body: formData
-           });
-           if (!response.ok) {
-               throw new Error(response.errorText);
-           }
-       } catch (error) {
-           throw error;
-       }
-    }
+  defaultHeaders = { 'Content-Type': 'application/json' };
 
-    async makeRequest(url, params = {}, method = 'GET', headers = {}, body = null) {
-        try {
-            const defaultHeaders = {
-                'Content-Type': 'application/json',
-            };
-    
-            const mergedHeaders = { ...defaultHeaders, ...headers };
-    
-            const urlWithParams = new URL(url);
-            Object.keys(params).forEach(key => urlWithParams.searchParams.append(key, params[key]));
-    
-            const options = {
-                method: method.toUpperCase(),
-                headers: mergedHeaders,
-                body: body ? JSON.stringify(body) : null
-            };
-    
-            let response = await fetch(urlWithParams.toString(), options);
-
-            if (response.ok) {
-                if (!url.includes('downloadItems')) { 
-                    response =  await response.json();
-                }
-
-                if (response.errorText) {
-                    throw new Error(`${response.errorText}`);
-                } else {
-                    return response;
-                }
-            } else {
-                throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
-            }
-        } catch (error) {
-            throw error;
-        }
-    }
+  constructor(baseUrl, onRequestExecuted) {
+    this.uploadData = {};
+    this.baseUrl = baseUrl;
+    this.onRequestExecuted = onRequestExecuted;
   }
-  
+
+  getRequestUrl(methodName) {
+    return `${this.baseUrl}/${methodName}`;
+  }
+
+  removeUploadData(fileName) {
+    delete this.uploadData[fileName];
+  }
+
+  initUploadData(fileName, uploadId) {
+    this.uploadData[fileName] = { uploadId, parts: [] };
+  }
+
+  addPartToUploadData(fileName, part) {
+    this.uploadData[fileName].parts.push(part);
+  }
+
+  getUploadId(fileName) {
+    return this.uploadData[fileName].uploadId;
+  }
+
+  getParts(fileName) {
+    return this.uploadData[fileName].parts;
+  }
+
+  async getItems(key) {
+    const params = { 'path': key };
+    const requestParams = { method: 'GET' };
+    return this.makeRequestAsync('getItems', params, requestParams);
+  }
+
+  async renameItem(key, parentPath, name) {
+    const params = { 'key': key, 'directory': parentPath, 'newName': name };
+    const requestParams = { method: 'PUT' };
+    await this.makeRequestAsync('renameItem', params, requestParams);
+  }
+
+  async createDirectory(key, name) {
+    const params = { 'path': key, 'name': name };
+    const requestParams = { method: 'PUT' };
+    await this.makeRequestAsync('createDirectory', params, requestParams);
+  }
+
+  async deleteItem(key) {
+    const params = { 'item': key };
+    const requestParams = { method: 'POST' };
+    await this.makeRequestAsync('deleteItem', params, requestParams);
+  }
+
+  async copyItem(sourceKey, destinationKey) {
+    const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
+    const requestParams = { method: 'PUT' };
+    await this.makeRequestAsync('deleteItem', params, requestParams);
+  }
+
+  async moveItem(sourceKey, destinationKey) {
+    const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
+    const requestParams = { method: 'POST' };
+    await this.makeRequestAsync('deleteItem', params, requestParams);
+  }
+
+  async downloadItems(keys) {
+    const params = {};
+    const requestParams = { method: 'POST', body: JSON.stringify(keys), headers: this.defaultHeaders };
+    return this.makeRequestAsync('downloadItems', params, requestParams);
+  }
+
+  async uploadPart(fileData, uploadInfo, destinationDirectory) {
+    const params = {};
+    const key = `${destinationDirectory.key}${fileData.name}`;
+
+    const data = new FormData();
+    data.append('part', uploadInfo.chunkBlob);
+    data.append('fileName', key);
+    data.append('uploadId', this.getUploadId(key));
+    data.append('partNumber', uploadInfo.chunkIndex);
+    data.append('partSize', uploadInfo.chunkBlob.size);
+
+    const requestOptions = {
+      method: 'POST',
+      body: data,
+    };
+
+    const etag = await this.makeRequestAsync('uploadPart', params, requestOptions);
+    // partNumber must be > 0
+    this.addPartToUploadData(key, { PartNumber: uploadInfo.chunkIndex + 1, ETag: etag });
+  }
+
+  async completeUpload(fileData, uploadInfo, destinationDirectory) {
+    const key = `${destinationDirectory.key}${fileData.name}`;
+    const params = {
+      key,
+      uploadId: this.getUploadId(key),
+    };
+    const requestOptions = {
+      method: 'POST',
+      headers: this.defaultHeaders,
+      body: JSON.stringify(this.getParts(key)),
+    };
+
+    await this.makeRequestAsync('completeUpload', params, requestOptions);
+    this.removeUploadData(key);
+  }
+
+  async initUpload(fileData, destinationDirectory) {
+    const params = { key: `${destinationDirectory.key}${fileData.name}` };
+    const requestOptions = {
+      method: 'POST',
+      headers: this.defaultHeaders,
+    };
+
+    const uploadId = await this.makeRequestAsync('initUpload', params, requestOptions);
+    this.initUploadData(params.key, uploadId);
+  }
+
+  async makeRequestAsync(method, queryParams, requestParams) {
+    const requestUrl = this.getRequestUrl(method);
+    const url = new URL(requestUrl);
+
+    Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
+
+    if (this.onRequestExecuted) {
+      const params = {
+        method,
+        urlPath: requestUrl,
+        queryString: url.toString().replace(requestUrl, ''),
+      };
+      this.onRequestExecuted(params);
+    }
+
+    const response = await fetch(url.toString(), requestParams);
+
+    if (!response.ok) {
+      const errorResult = await response.text();
+      throw new Error(errorResult.errorText);
+    }
+    const contentDisposition = response.headers.get('Content-Disposition');
+    if (contentDisposition && contentDisposition.includes('attachment')) {
+      // processing downloadItems request
+      return response.blob();
+    }
+    const contentType = response.headers.get('Content-Type');
+    if (!contentType || contentType.includes('text/plain')) {
+      return response.text();
+    }
+    return response.json();
+  }
+}
