@@ -75,7 +75,7 @@ class AmazonGateway {
 
   async uploadPart(fileData, uploadInfo, destinationDirectory) {
     const params = {};
-    const key = `${destinationDirectory.key}${fileData.name}`;
+    const key = `${destinationDirectory?.key ?? ''}${fileData.name}`;
 
     const data = new FormData();
     data.append('part', uploadInfo.chunkBlob);
@@ -95,7 +95,7 @@ class AmazonGateway {
   }
 
   async completeUpload(fileData, uploadInfo, destinationDirectory) {
-    const key = `${destinationDirectory.key}${fileData.name}`;
+    const key = `${destinationDirectory?.key ?? ''}${fileData.name}`;
     const params = {
       key,
       uploadId: this.getUploadId(key),
@@ -111,7 +111,7 @@ class AmazonGateway {
   }
 
   async initUpload(fileData, destinationDirectory) {
-    const params = { key: `${destinationDirectory.key}${fileData.name}` };
+    const params = { key: `${destinationDirectory?.key ?? ''}${fileData.name}` };
     const requestOptions = {
       method: 'POST',
       headers: this.defaultHeaders,
@@ -119,6 +119,16 @@ class AmazonGateway {
 
     const uploadId = await this.makeRequestAsync('initUpload', params, requestOptions);
     this.initUploadData(params.key, uploadId);
+  }
+
+  /* eslint-disable-next-line spellcheck/spell-checker */
+  async getPresignedDownloadUrl(fileName) {
+    const params = { key: fileName };
+    const requestOptions = {
+      method: 'POST',
+      headers: this.defaultHeaders,
+    };
+    return this.makeRequestAsync('getPresignedDownloadUrl', params, requestOptions);
   }
 
   async makeRequestAsync(method, queryParams, requestParams) {
