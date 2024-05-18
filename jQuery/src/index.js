@@ -11,6 +11,7 @@ $(() => {
     moveItem,
     uploadFileChunk,
     downloadItems,
+    abortFileUpload,
   });
 
   $('#file-manager').dxFileManager({
@@ -18,12 +19,10 @@ $(() => {
 
     allowedFileExtensions: [],
     upload: {
-      // maxFileSize: 1048576,
-      chunkSize: 6000000,
+      chunkSize: 5242880,
     },
     permissions: {
       download: true,
-      // uncomment the code below to enable file/directory management
       create: true,
       copy: true,
       move: true,
@@ -34,36 +33,76 @@ $(() => {
   });
 });
 
-function getItems(item) {
-  return amazon.getItems(item.key);
+async function getItems(item) {
+  try {
+    return amazon.getItems(item.key);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function createDirectory(parentDirectory, name) {
-  return amazon.createDirectory(parentDirectory.key, name);
+async function createDirectory(parentDirectory, name) {
+  try {
+    await amazon.createDirectory(parentDirectory.key, name);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function renameItem(item, name) {
-  return amazon.renameItem(item.key, item.parentPath, name);
+async function renameItem(item, name) {
+  try {
+    await amazon.renameItem(item.key, item.parentPath, name);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function deleteItem(item) {
-  return amazon.deleteItem(item.key);
+async function deleteItem(item) {
+  try {
+    await amazon.deleteItem(item.key);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function copyItem(item, destinationDirectory) {
-  return amazon.copyItem(item, destinationDirectory);
+async function copyItem(item, destinationDirectory) {
+  try {
+    await amazon.copyItem(item, destinationDirectory);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function moveItem(item, destinationDirectory) {
-  return amazon.moveItem(item, destinationDirectory);
+async function moveItem(item, destinationDirectory) {
+  try {
+    await amazon.moveItem(item, destinationDirectory);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
+}
+
+async function abortFileUpload(fileData, uploadInfo, destinationDirectory) {
+  try {
+    await amazon.abortFileUpload(fileData, uploadInfo, destinationDirectory);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 }
 
 async function uploadFileChunk(fileData, uploadInfo, destinationDirectory) {
-  await amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+  try {
+    await amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 }
 
-function downloadItems(items) {
-  return amazon.downloadItems(items);
+async function downloadItems(items) {
+  try {
+    await amazon.downloadItems(items);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 }
 
 function onRequestExecuted(e) {

@@ -3,85 +3,127 @@
 <h2>Home</h2>
 
 @(Html.DevExtreme().FileManager()
-        .ID("file-manager")
-        .FileSystemProvider(provider => provider.Custom()
-            .GetItems("getItems")
-            .CreateDirectory("createDirectory")
-            .RenameItem("renameItem")
-            .DeleteItem("deleteItem")
-            .CopyItem("copyItem")
-            .MoveItem("moveItem")
-            .UploadFileChunk("uploadFileChunk")
-            .DownloadItems("downloadItems")
-        )
-        .Permissions(permissions =>
-        {
-             permissions.Download(true);
-             permissions.Create(true);
-             permissions.Copy(true);
-             permissions.Move(true);
-             permissions.Delete(true);
-             permissions.Rename(true);
-             permissions.Upload(true);
-        })
-        .Upload(upload => upload.ChunkSize(600000))
-        .AllowedFileExtensions(new string[0])
-    )
+  .ID("file-manager")
+  .FileSystemProvider(provider => provider.Custom()
+      .GetItems("getItems")
+      .CreateDirectory("createDirectory")
+      .RenameItem("renameItem")
+      .DeleteItem("deleteItem")
+      .CopyItem("copyItem")
+      .MoveItem("moveItem")
+      .UploadFileChunk("uploadFileChunk")
+      .DownloadItems("downloadItems")
+      .AbortFileUpload("abortFileUpload")
+  )
+  .Permissions(permissions =>
+  {
+    permissions.Download(true);
+    permissions.Create(true);
+    permissions.Copy(true);
+    permissions.Move(true);
+    permissions.Delete(true);
+    permissions.Rename(true);
+    permissions.Upload(true);
+  })
+  .Upload(upload => upload.ChunkSize(5242880))
+  .AllowedFileExtensions(new string[0])
+)
+
 <div id="request-panel"></div>
 <script src="~/js/amazon.gateway.js"></script>
 <script src="~/js/amazon.filesystem.js"></script>
 <script type="text/javascript">
 
-  baseUrl = `https://localhost:52366/api/AmazonS3`;
-  amazon = new AmazonFileSystem(baseUrl, onRequestExecuted);
+baseUrl = `https://localhost:52366/api/AmazonS3`;
+amazon = new AmazonFileSystem(baseUrl, onRequestExecuted);
 
-function getItems(item) {
-  return amazon.getItems(item.key);
+async function getItems(item) {
+  try {
+    return amazon.getItems(item.key);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function createDirectory(parentDirectory, name) {
-  return amazon.createDirectory(parentDirectory.key, name);
+async function createDirectory(parentDirectory, name) {
+  try {
+    await amazon.createDirectory(parentDirectory.key, name);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function renameItem(item, name) {
-  return amazon.renameItem(item.key, item.parentPath, name);
+async function renameItem(item, name) {
+  try {
+    await amazon.renameItem(item.key, item.parentPath, name);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function deleteItem(item) {
-  return amazon.deleteItem(item.key);
+async function deleteItem(item) {
+  try {
+    await amazon.deleteItem(item.key);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function copyItem(item, destinationDirectory) {
-  return amazon.copyItem(item, destinationDirectory);
+async function copyItem(item, destinationDirectory) {
+  try {
+    await amazon.copyItem(item, destinationDirectory);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
 }
 
-function moveItem(item, destinationDirectory) {
-  return amazon.moveItem(item, destinationDirectory);
+async function moveItem(item, destinationDirectory) {
+  try {
+    await amazon.moveItem(item, destinationDirectory);
+  } catch (error) {
+    throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+  }
+}
+
+async function abortFileUpload(fileData, uploadInfo, destinationDirectory) {
+  try {
+    await amazon.abortFileUpload(fileData, uploadInfo, destinationDirectory);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 }
 
 async function uploadFileChunk(fileData, uploadInfo, destinationDirectory) {
-  await amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+  try {
+    await amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 }
 
-function downloadItems(items) {
-  return amazon.downloadItems(items);
+async function downloadItems(items) {
+  try {
+    await amazon.downloadItems(items);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 }
 
-    function onRequestExecuted(e) {
-        $("<div>").addClass("request-info").append(
-            createParameterInfoDiv("Method:", e.method),
-            createParameterInfoDiv("Url path:", e.urlPath),
-            createParameterInfoDiv("Query string:", e.queryString),
-            $("<br>")
-        )
-            .prependTo("#request-panel");
-    }
+function onRequestExecuted(e) {
+  $("<div>").addClass("request-info").append(
+      createParameterInfoDiv("Method:", e.method),
+      createParameterInfoDiv("Url path:", e.urlPath),
+      createParameterInfoDiv("Query string:", e.queryString),
+      $("<br>")
+  )
+  .prependTo("#request-panel");
+}
 
-    function createParameterInfoDiv(name, value) {
-        return $("<div>").addClass("parameter-info").append(
-            $("<div>").addClass("parameter-name").text(name),
-            $("<div>").addClass("parameter-value dx-theme-accent-as-text-color").text(value).attr("title", value)
-        );
-    }
+function createParameterInfoDiv(name, value) {
+  return $("<div>").addClass("parameter-info").append(
+      $("<div>").addClass("parameter-name").text(name),
+      $("<div>").addClass("parameter-value dx-theme-accent-as-text-color").text(value).attr("title", value)
+  );
+}
 
 </script>

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import type { Ref } from 'vue';
 
 import {
-  DxFileManager, DxPermissions
+  DxFileManager, DxPermissions, DxUpload
 } from 'devextreme-vue/file-manager';
 
 import 'devextreme/dist/css/dx.material.blue.light.compact.css';
@@ -29,6 +29,7 @@ const fileSystemProvider = getAmazonFileSystemProvider(endpointUrl, onRequestExe
       :file-system-provider="fileSystemProvider"
       :allowed-file-extensions="allowedFileExtensions"
     >
+      <DxUpload :chunk-size="5242880"/>
       <DxPermissions/>
       <DxPermissions
         :create="true"

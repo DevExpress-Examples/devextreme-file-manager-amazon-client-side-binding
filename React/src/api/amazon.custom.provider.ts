@@ -26,6 +26,7 @@ export class AmazonCustomProvider {
       moveItem: this.moveItem,
       uploadFileChunk: this.uploadFileChunk,
       downloadItems: this.downloadItems,
+      abortFileUpload: this.abortFileUpload,
     };
     this.fileSystemProvider = new CustomFileSystemProvider(options);
   }
@@ -78,7 +79,7 @@ export class AmazonCustomProvider {
     }
   };
 
-  uploadFileChunk = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
+  uploadFileChunk = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
     try {
       await this.amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
     } catch (error: any) {
@@ -92,6 +93,14 @@ export class AmazonCustomProvider {
     } catch (error: any) {
       const item = items.length > 1 ? undefined : items[0];
       throw new FileSystemError(32767, item, error.message);
+    }
+  };
+
+  abortFileUpload = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
+    try {
+      await this.amazon.abortFileUpload(fileData, uploadInfo, destinationDirectory);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 }
