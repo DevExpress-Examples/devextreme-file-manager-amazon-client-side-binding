@@ -31,28 +31,28 @@ class AmazonGateway {
     return this.uploadData[fileName].parts;
   }
 
-  async getItems(key) {
+  getItems(key) {
     const params = { 'path': key };
     const requestParams = { method: 'GET' };
     return this.makeRequest('getItems', params, requestParams);
   }
 
-  async renameItem(key, parentPath, name) {
+  renameItem(key, parentPath, name) {
     const params = { 'key': key, 'directory': parentPath, 'newName': name };
     const requestParams = { method: 'PUT' };
-    await this.makeRequest('renameItem', params, requestParams);
+    return this.makeRequest('renameItem', params, requestParams);
   }
 
-  async createDirectory(key, name) {
+  createDirectory(key, name) {
     const params = { 'path': key, 'name': name };
     const requestParams = { method: 'PUT' };
-    await this.makeRequest('createDirectory', params, requestParams);
+    return this.makeRequest('createDirectory', params, requestParams);
   }
 
   async deleteItem(key) {
     const params = { 'item': key };
     const requestParams = { method: 'POST' };
-    await this.makeRequestAsync('deleteItem', params, requestParams);
+    await this.makeRequest('deleteItem', params, requestParams);
   }
 
   async copyItem(sourceKey, destinationKey) {
@@ -122,10 +122,12 @@ class AmazonGateway {
   }
 
   async abortFileUpload(fileData, uploadInfo, destinationDirectory) {
-    const params = { uploadId: this.getUploadId(fileData.name) };
+    const key = `${destinationDirectory?.key ?? ''}${fileData.name}`;
+    const uploadId = this.getUploadId(fileData.name);
+    const params = { uploadId, key };
     const requestOptions = {
       method: 'POST',
-      headers: this.defaultHeaders
+      headers: this.defaultHeaders,
     };
     return this.makeRequest('abortUpload', params, requestOptions);
   }
@@ -140,36 +142,56 @@ class AmazonGateway {
     return this.makeRequest('getPresignedDownloadUrl', params, requestOptions);
   }
 
+  logRequest(method, url, requestUrl) {
+    if (!this.onRequestExecuted) {
+      return;
+    }
+    const params = {
+      method,
+      urlPath: requestUrl,
+      queryString: url.toString().replace(requestUrl, ''),
+    };
+    this.onRequestExecuted(params);
+  }
+
+  containsAttachment(response) {
+    const contentDisposition = response.headers.get('Content-Disposition');
+    if (contentDisposition && contentDisposition.includes('attachment')) {
+      return true;
+    }
+    return false;
+  }
+
+  containsPlainText(response) {
+    const contentType = response.headers.get('Content-Type');
+    if (!contentType || contentType.includes('text/plain')) {
+      return true;
+    }
+    return false;
+  }
+
   async makeRequest(method, queryParams, requestParams) {
     const requestUrl = this.getRequestUrl(method);
     const url = new URL(requestUrl);
 
     Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
+    this.logRequest(method, url, requestUrl);
 
-    if (this.onRequestExecuted) {
-      const params = {
-        method,
-        urlPath: requestUrl,
-        queryString: url.toString().replace(requestUrl, ''),
-      };
-      this.onRequestExecuted(params);
+    try {
+      const response = await fetch(url.toString(), requestParams);
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+      if (this.containsAttachment(response)) {
+        return response.blob();
+      }
+      if (this.containsPlainText(response)) {
+        return response.text();
+      }
+      return response.json();
+    } catch (error) {
+      throw new Error(error.message);
     }
-
-    const response = await fetch(url.toString(), requestParams);
-
-    if (!response.ok) {
-      const errorResult = await response.text();
-      throw new Error(errorResult.errorText);
-    }
-    const contentDisposition = response.headers.get('Content-Disposition');
-    if (contentDisposition && contentDisposition.includes('attachment')) {
-      // processing downloadItems request
-      return response.blob();
-    }
-    const contentType = response.headers.get('Content-Type');
-    if (!contentType || contentType.includes('text/plain')) {
-      return response.text();
-    }
-    return response.json();
   }
 }

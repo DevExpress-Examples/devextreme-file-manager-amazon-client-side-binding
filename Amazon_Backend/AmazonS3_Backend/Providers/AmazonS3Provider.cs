@@ -223,6 +223,7 @@ namespace AmazonS3_Backend.Providers {
                     Key = item,
                     Size = 0,
                     IsDirectory = true,
+                    DateModified = DateTime.UtcNow,
                     HasSubDirectories = await HasDirectorySubDirectoriesAsync(item),
                 });
             }
@@ -313,8 +314,10 @@ namespace AmazonS3_Backend.Providers {
             return await Client.CompleteMultipartUploadAsync(request);
         }
 
-        public async Task<AbortMultipartUploadResponse> AbortUploadAsync(string uploadId) {
+        public async Task<AbortMultipartUploadResponse> AbortUploadAsync(string uploadId, string key) {
             var request = new AbortMultipartUploadRequest() {
+                BucketName = BucketName,
+                Key = key,
                 UploadId = uploadId
             };
             return await Client.AbortMultipartUploadAsync(request);
