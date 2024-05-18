@@ -12,7 +12,7 @@ export class AmazonFileSystem {
   }
 
   async getItems(key: string): Promise<FileSystemItem[]> {
-    return await this.gateway.getItems(key) as Promise<FileSystemItem[]>;
+    return this.gateway.getItems(key) as Promise<FileSystemItem[]>;
   }
 
   async createDirectory(key: string, name: string): Promise<any> {
@@ -48,6 +48,10 @@ export class AmazonFileSystem {
     }
   }
 
+  async getPresignedDownloadUrl(fileName: string): Promise<any> {
+    return this.gateway.getPresignedDownloadUrl(fileName);
+  }
+
   getFileNameFromKey(key: string): string {
     const index = key.lastIndexOf('/');
     if (index === -1) {
@@ -55,7 +59,10 @@ export class AmazonFileSystem {
     }
     return key.substring(index + 1);
   }
-
+  /* eslint-disable-next-line vue/max-len */
+  async abortFileUpload(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
+    await this.gateway.abortFileUpload(fileData, uploadInfo, destinationDirectory);
+  }
   /* eslint-disable-next-line vue/max-len */
   async uploadFileChunk(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
     try {
