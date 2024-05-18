@@ -60,11 +60,11 @@ export class AmazonFileSystem {
     return key.substring(index + 1);
   }
   /* eslint-disable-next-line vue/max-len */
-  async abortFileUpload(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
+  async abortFileUpload(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<any> {
     await this.gateway.abortFileUpload(fileData, uploadInfo, destinationDirectory);
   }
   /* eslint-disable-next-line vue/max-len */
-  async uploadFileChunk(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
+  async uploadFileChunk(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<any> {
     try {
       if (uploadInfo.chunkIndex === 0) {
         await this.gateway.initUpload(fileData, destinationDirectory);

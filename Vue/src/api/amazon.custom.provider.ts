@@ -79,7 +79,7 @@ export class AmazonCustomProvider {
     }
   };
   /* eslint-disable-next-line vue/max-len */
-  uploadFileChunk = async(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
+  uploadFileChunk = async(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
     try {
       await this.amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
     } catch (error: any) {
@@ -96,7 +96,7 @@ export class AmazonCustomProvider {
     }
   };
   /* eslint-disable-next-line vue/max-len */
-  abortFileUpload = async(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
+  abortFileUpload = async(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
     try {
       await this.amazon.abortFileUpload(fileData, uploadInfo, destinationDirectory);
     } catch (error: any) {

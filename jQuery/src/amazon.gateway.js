@@ -11,6 +11,18 @@ class AmazonGateway {
     return `${this.baseUrl}/${methodName}`;
   }
 
+  logRequest(method, url, requestUrl) {
+    if (!this.onRequestExecuted) {
+      return;
+    }
+    const params = {
+      method,
+      urlPath: requestUrl,
+      queryString: url.toString().replace(requestUrl, ''),
+    };
+    this.onRequestExecuted(params);
+  }
+
   removeUploadData(fileName) {
     delete this.uploadData[fileName];
   }
@@ -142,16 +154,33 @@ class AmazonGateway {
     return this.makeRequest('getPresignedDownloadUrl', params, requestOptions);
   }
 
-  logRequest(method, url, requestUrl) {
-    if (!this.onRequestExecuted) {
-      return;
+  async makeRequest(method, queryParams, requestParams) {
+    const requestUrl = this.getRequestUrl(method);
+    const url = new URL(requestUrl);
+
+    Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
+    this.logRequest(method, url, requestUrl);
+
+    try {
+      const response = await fetch(url.toString(), requestParams);
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+      return await this.getResponseData(response);
+    } catch (error) {
+      throw new Error(error.message);
     }
-    const params = {
-      method,
-      urlPath: requestUrl,
-      queryString: url.toString().replace(requestUrl, ''),
-    };
-    this.onRequestExecuted(params);
+  }
+
+  async getResponseData(response) {
+    if (this.containsAttachment(response)) {
+      return response.blob();
+    }
+    if (this.containsPlainText(response)) {
+      return response.text();
+    }
+    return response.json();
   }
 
   containsAttachment(response) {
@@ -168,30 +197,5 @@ class AmazonGateway {
       return true;
     }
     return false;
-  }
-
-  async makeRequest(method, queryParams, requestParams) {
-    const requestUrl = this.getRequestUrl(method);
-    const url = new URL(requestUrl);
-
-    Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
-    this.logRequest(method, url, requestUrl);
-
-    try {
-      const response = await fetch(url.toString(), requestParams);
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(errorMessage);
-      }
-      if (this.containsAttachment(response)) {
-        return response.blob();
-      }
-      if (this.containsPlainText(response)) {
-        return response.text();
-      }
-      return response.json();
-    } catch (error) {
-      throw new Error(error.message);
-    }
   }
 }

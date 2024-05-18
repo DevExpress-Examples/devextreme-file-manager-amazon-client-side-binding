@@ -79,7 +79,7 @@ export class AmazonCustomProvider {
     }
   };
 
-  uploadFileChunk = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
+  uploadFileChunk = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
     try {
       await this.amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
     } catch (error: any) {
@@ -96,7 +96,7 @@ export class AmazonCustomProvider {
     }
   };
 
-  abortFileUpload = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
+  abortFileUpload = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
     try {
       await this.amazon.abortFileUpload(fileData, uploadInfo, destinationDirectory);
     } catch (error: any) {

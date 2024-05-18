@@ -100,6 +100,16 @@ namespace AmazonS3Backend.Controllers {
             }
         }
 
+        [HttpPost("getPresignedDownloadUrl")]
+        public async Task<IActionResult> GetPresignedDownloadUrl(string key) {
+            try {
+                var presignedDownloadUrl = await provider.GetPresignedDownloadUrlAsync(key);
+                return Ok(presignedDownloadUrl);
+            } catch (Exception ex) {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpPost("uploadPart")]
         public async Task<IActionResult> UploadPart([FromForm] IFormFile part, [FromForm] int partNumber, [FromForm] long partSize, [FromForm] string fileName, [FromForm] string uploadId) {
             try {
@@ -119,6 +129,9 @@ namespace AmazonS3Backend.Controllers {
                 var response = await provider.CompleteUploadAsync(key, uploadId, parts);
                 // use `response` if you need to pass ETag or something else when upload is finished
                 return Ok(response.ETag);
+            } catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound) {
+                // abort is requested when upload is being completed
+                return Ok();
             } catch (Exception ex) {
                 return StatusCode(500, ex.Message);
             }

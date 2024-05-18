@@ -304,6 +304,16 @@ namespace AmazonS3_Backend.Providers {
 
             return await Client.GetPreSignedURLAsync(request);
         }
+        public async Task<string> GetPresignedDownloadUrlAsync(string key) {
+            var request = new GetPreSignedUrlRequest {
+                BucketName = BucketName,
+                Key = key,
+                Expires = DateTime.Now.AddSeconds(300),
+                Protocol = Protocol.HTTPS
+            };
+
+            return await Client.GetPreSignedURLAsync(request);
+        }
         public async Task<CompleteMultipartUploadResponse> CompleteUploadAsync(string key, string uploadId, List<PartETag> parts) {
             var request = new CompleteMultipartUploadRequest() {
                 BucketName = BucketName,

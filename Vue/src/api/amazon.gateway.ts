@@ -107,8 +107,8 @@ export class AmazonGateway {
     return this.makeRequest('getPresignedDownloadUrl', params, requestOptions);
   }
 
-  async initUpload(fileData: File, destinationDirectory: FileSystemItem): Promise<any> {
-    const params = { key: `${destinationDirectory.key}${fileData.name}` };
+  async initUpload(fileData: File, destinationDirectory: FileSystemItem | undefined): Promise<any> {
+    const params = { key: `${destinationDirectory?.key ?? ''}${fileData.name}` };
     const requestOptions = {
       method: 'POST',
       headers: this.defaultHeaders,
@@ -118,9 +118,9 @@ export class AmazonGateway {
     this.initUploadData(params.key, uploadId);
   }
   /* eslint-disable-next-line vue/max-len */
-  async uploadPart(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
+  async uploadPart(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<any> {
     const params = {};
-    const key = `${destinationDirectory.key}${fileData.name}`;
+    const key = `${destinationDirectory?.key ?? ''}${fileData.name}`;
 
     const data = new FormData();
     data.append('part', uploadInfo.chunkBlob);
@@ -139,8 +139,8 @@ export class AmazonGateway {
     this.addPartToUploadData(key, { PartNumber: uploadInfo.chunkIndex + 1, ETag: etag });
   }
   /* eslint-disable-next-line vue/max-len */
-  async completeUpload(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
-    const key = `${destinationDirectory.key}${fileData.name}`;
+  async completeUpload(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<any> {
+    const key = `${destinationDirectory?.key ?? ''}${fileData.name}`;
     const params = {
       key,
       uploadId: this.getUploadId(key),
@@ -155,7 +155,7 @@ export class AmazonGateway {
     this.removeUploadData(key);
   }
   /* eslint-disable-next-line vue/max-len */
-  async abortFileUpload(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<any> {
+  async abortFileUpload(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<any> {
     const key = `${destinationDirectory?.key ?? ''}${fileData.name}`;
     const uploadId = this.getUploadId(fileData.name);
     const params = { uploadId, key };
