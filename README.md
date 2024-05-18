@@ -5,17 +5,17 @@
 
 # FileManager for DevExtreme - Amazon S3 Client-Side Binding
 
-This example illustrates how to use the custom file provider to connect the FileManager component to the Amazon Simple Storage Service on the client side. The [Custom File System Provider](https://js.devexpress.com/Documentation/ApiReference/UI_Components/dxFileManager/File_System_Providers/Custom) allows you to implement custom APIs to handle file operations (add, delete, rename, etc.). All APIs that implement access to Amazon S3 on the client are stored in the amazon.file.system.js file (app.service.ts - for Angular framework). 
-On the Amazon S3, create a bucket, create a user and add permissions to access the created bucket.
+This example illustrates how to use the custom file provider to connect the FileManager component to the Amazon Simple Storage Service (S3) on the client side. The [Custom File System Provider](https://js.devexpress.com/Documentation/ApiReference/UI_Components/dxFileManager/File_System_Providers/Custom) allows you to implement custom APIs to handle file operations (add, delete, rename, etc.). All APIs that implement access to Amazon S3 on the client are stored in the amazon.file.system.js file (app.service.ts - for Angular framework). 
+On the Amazon Simple Storage Service, create a bucket, create a user and add permissions to access the created bucket.
 
-If you run an Angular, React, Vue, or jQuery example, you need to also run a .NET-based backend project - **Amazon_Backend**. To connect this project to an Amazon S3 server, you need to specify Amazon credentials of the user created previously. You need to add `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION` environment variables on your local machine or update the `AWS` section in [appsettings.json](Amazon_Backend/appsettings.json):
+If you run an Angular, React, Vue, or jQuery example, you need to also run a .NET-based backend project - **Amazon_Backend**. To connect this project to an Amazon S3 server, you need to specify Amazon credentials of the user created previously. You need to update the `AWS` section in [appsettings.json](Amazon_Backend/appsettings.json):
 
 ```json
 "AWS": {
     "AccessKey": "yourAccessKey",
     "SecretKey": "yourSecretKey",
-    "BlobName": "blobName",
-    "Region": "region"
+    "Region": "region",
+    "Bucket": "your bucket name"
   },
 ```
 
@@ -42,5 +42,6 @@ If you run an Angular, React, Vue, or jQuery example, you need to also run a .NE
 
 ## More Examples
 
+- [File Manager for DevExtreme - Direct Upload to Amazon](https://github.com/DevExpress-Examples/devextreme-file-manager-direct-upload-to-amazon)
 - [FileManager for DevExtreme - Azure Server-Side Binding](https://github.com/DevExpress-Examples/devextreme-file-manager-azure-server-side-binding)
 - [FileUploader for DevExtreme - Direct Upload to Azure](https://github.com/DevExpress-Examples/devextreme-file-uploader-direct-upload-to-azure)
