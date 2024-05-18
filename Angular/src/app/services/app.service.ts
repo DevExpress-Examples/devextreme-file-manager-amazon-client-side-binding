@@ -28,6 +28,7 @@ export class FileManagerService {
       moveItem: this.moveItem,
       uploadFileChunk: this.uploadFileChunk,
       downloadItems: this.downloadItems,
+      abortFileUpload: this.abortFileUpload,
     };
     this.fileSystemProvider = new CustomFileSystemProvider(options);
   }
@@ -90,10 +91,18 @@ export class FileManagerService {
 
   downloadItems = async (items: FileSystemItem[]): Promise<void> => {
     try {
-      return await this.amazon.downloadItems(items);
+      await this.amazon.downloadItems(items);
     } catch (error: any) {
       const item = items.length > 1 ? undefined : items[0];
       throw new FileSystemError(32767, item, error.message);
+    }
+  };
+
+  abortFileUpload = async (fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem): Promise<void> => {
+    try {
+      await this.amazon.abortFileUpload(fileData, uploadInfo, destinationDirectory);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   };
 }
