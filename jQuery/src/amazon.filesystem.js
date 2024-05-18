@@ -49,7 +49,15 @@ class AmazonFileSystem {
     try {
       return await this.gateway.moveItem(item.key, `${destinationDir.key}${item.name}`);
     } catch (error) {
-      throw new DevExpress.fileManagement.FileSystemError(32767, item.key, error.message);
+      throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
+    }
+  }
+
+  async abortFileUpload(fileData, uploadInfo) {
+    try {
+      await this.gateway.abortFileUpload(fileData, uploadInfo);
+    } catch (error) {
+      throw new DevExpress.fileManagement.FileSystemError(32767, item, error.message);
     }
   }
 

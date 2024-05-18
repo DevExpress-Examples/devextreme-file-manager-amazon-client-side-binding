@@ -165,6 +165,7 @@ namespace AmazonS3_Backend.Providers {
                 throw;
             }
         }
+
         public async Task RenameItemAsync(string key, string? directory, string newName) {
             if (IsDirectory(key)) {
                 throw new NotImplementedException("Renaming directories is not implemented");
@@ -203,6 +204,7 @@ namespace AmazonS3_Backend.Providers {
             }
             return result;
         }
+
         public string GetDirectoryNameFromKey(string key) {
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("Directory name cannot be empty");
@@ -226,20 +228,6 @@ namespace AmazonS3_Backend.Providers {
             }
             return result;
         }
-        public async Task<string> GetPresignedUrl(string key, int expirationSeconds) {
-            DateTime expiration = DateTime.UtcNow.AddSeconds(expirationSeconds);
-            
-            GetPreSignedUrlRequest request = new GetPreSignedUrlRequest {
-                BucketName = BucketName,
-                //Key = key,
-                
-                Verb = HttpVerb.PUT,
-                Expires = expiration,
-                
-            };
-
-            return await Client.GetPreSignedURLAsync(request);
-        }
 
         public async Task<bool> HasDirectorySubDirectoriesAsync(string key) {
             try {
@@ -256,6 +244,7 @@ namespace AmazonS3_Backend.Providers {
                 throw;
             }
         }
+
         string GetNewDirectoryName(string? path, string name) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Directory name cannot be null or empty");

@@ -11,6 +11,7 @@ $(() => {
     moveItem,
     uploadFileChunk,
     downloadItems,
+    abortFileUpload,
   });
 
   $('#file-manager').dxFileManager({
@@ -18,12 +19,10 @@ $(() => {
 
     allowedFileExtensions: [],
     upload: {
-      // maxFileSize: 1048576,
-      chunkSize: 6000000,
+      chunkSize: 5242880,
     },
     permissions: {
       download: true,
-      // uncomment the code below to enable file/directory management
       create: true,
       copy: true,
       move: true,
@@ -56,6 +55,10 @@ function copyItem(item, destinationDirectory) {
 
 function moveItem(item, destinationDirectory) {
   return amazon.moveItem(item, destinationDirectory);
+}
+
+async function abortFileUpload(fileData, uploadInfo) {
+  return amazon.abortFileUpload(fileData, uploadInfo);
 }
 
 async function uploadFileChunk(fileData, uploadInfo, destinationDirectory) {

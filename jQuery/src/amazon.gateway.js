@@ -34,19 +34,19 @@ class AmazonGateway {
   async getItems(key) {
     const params = { 'path': key };
     const requestParams = { method: 'GET' };
-    return this.makeRequestAsync('getItems', params, requestParams);
+    return this.makeRequest('getItems', params, requestParams);
   }
 
   async renameItem(key, parentPath, name) {
     const params = { 'key': key, 'directory': parentPath, 'newName': name };
     const requestParams = { method: 'PUT' };
-    await this.makeRequestAsync('renameItem', params, requestParams);
+    await this.makeRequest('renameItem', params, requestParams);
   }
 
   async createDirectory(key, name) {
     const params = { 'path': key, 'name': name };
     const requestParams = { method: 'PUT' };
-    await this.makeRequestAsync('createDirectory', params, requestParams);
+    await this.makeRequest('createDirectory', params, requestParams);
   }
 
   async deleteItem(key) {
@@ -58,19 +58,19 @@ class AmazonGateway {
   async copyItem(sourceKey, destinationKey) {
     const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
     const requestParams = { method: 'PUT' };
-    await this.makeRequestAsync('copyItem', params, requestParams);
+    await this.makeRequest('copyItem', params, requestParams);
   }
 
   async moveItem(sourceKey, destinationKey) {
     const params = { 'sourceKey': sourceKey, 'destinationKey': destinationKey };
     const requestParams = { method: 'POST' };
-    await this.makeRequestAsync('moveItem', params, requestParams);
+    await this.makeRequest('moveItem', params, requestParams);
   }
 
   async downloadItems(keys) {
     const params = {};
     const requestParams = { method: 'POST', body: JSON.stringify(keys), headers: this.defaultHeaders };
-    return this.makeRequestAsync('downloadItems', params, requestParams);
+    return this.makeRequest('downloadItems', params, requestParams);
   }
 
   async uploadPart(fileData, uploadInfo, destinationDirectory) {
@@ -89,7 +89,7 @@ class AmazonGateway {
       body: data,
     };
 
-    const etag = await this.makeRequestAsync('uploadPart', params, requestOptions);
+    const etag = await this.makeRequest('uploadPart', params, requestOptions);
     // partNumber must be > 0
     this.addPartToUploadData(key, { PartNumber: uploadInfo.chunkIndex + 1, ETag: etag });
   }
@@ -106,7 +106,7 @@ class AmazonGateway {
       body: JSON.stringify(this.getParts(key)),
     };
 
-    await this.makeRequestAsync('completeUpload', params, requestOptions);
+    await this.makeRequest('completeUpload', params, requestOptions);
     this.removeUploadData(key);
   }
 
@@ -117,8 +117,17 @@ class AmazonGateway {
       headers: this.defaultHeaders,
     };
 
-    const uploadId = await this.makeRequestAsync('initUpload', params, requestOptions);
+    const uploadId = await this.makeRequest('initUpload', params, requestOptions);
     this.initUploadData(params.key, uploadId);
+  }
+
+  async abortFileUpload(fileData, uploadInfo, destinationDirectory) {
+    const params = { uploadId: this.getUploadId(fileData.name) };
+    const requestOptions = {
+      method: 'POST',
+      headers: this.defaultHeaders
+    };
+    return this.makeRequest('abortUpload', params, requestOptions);
   }
 
   /* eslint-disable-next-line spellcheck/spell-checker */
@@ -128,10 +137,10 @@ class AmazonGateway {
       method: 'POST',
       headers: this.defaultHeaders,
     };
-    return this.makeRequestAsync('getPresignedDownloadUrl', params, requestOptions);
+    return this.makeRequest('getPresignedDownloadUrl', params, requestOptions);
   }
 
-  async makeRequestAsync(method, queryParams, requestParams) {
+  async makeRequest(method, queryParams, requestParams) {
     const requestUrl = this.getRequestUrl(method);
     const url = new URL(requestUrl);
 
