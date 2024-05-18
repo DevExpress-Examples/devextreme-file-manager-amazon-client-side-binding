@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import './App.css';
 import 'devextreme/dist/css/dx.material.blue.light.compact.css';
 
-import FileManager, { Permissions } from 'devextreme-react/file-manager';
+import FileManager, { Permissions, Upload } from 'devextreme-react/file-manager';
 
 import { getAmazonFileSystemProvider } from './api/amazon.custom.provider';
 
@@ -39,8 +39,8 @@ export default function App(): JSX.Element {
         fileSystemProvider={fileSystemProvider}
         allowedFileExtensions={allowedFileExtensions}
       >
+        <Upload chunkSize={5242880}></Upload>
         <Permissions download={true}></Permissions>
-        {/* uncomment the code below to enable file/directory management */}
         <Permissions
           create={true}
           copy={true}
