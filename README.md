@@ -5,12 +5,15 @@
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
 <!-- default badges end -->
 
-# FileManager for DevExtreme - Amazon S3 Client-Side Binding
+# DevExtreme FileManager - Amazon S3 Client-Side Binding
 
-This example illustrates how to use the custom file provider to connect the FileManager component to the Amazon Simple Storage Service (S3) on the client side. The [Custom File System Provider](https://js.devexpress.com/Documentation/ApiReference/UI_Components/dxFileManager/File_System_Providers/Custom) allows you to implement custom APIs to handle file operations (add, delete, rename, etc.). All APIs that implement access to Amazon S3 on the client are stored in the amazon.file.system.js file (app.service.ts - for Angular framework). 
-On the Amazon Simple Storage Service, create a bucket, create a user and add permissions to access the created bucket.
+This example uses a custom file provider to connect the FileManager component to the Amazon Simple Storage Service (S3) on the client. The [Custom File System Provider](https://js.devexpress.com/Documentation/ApiReference/UI_Components/dxFileManager/File_System_Providers/Custom) allows you to implement custom APIs to handle file operations (add, delete, rename, etc.). All APIs used to access Amazon S3 services on the client are stored in the `amazon.file.system.js` file (`app.service.ts` - for Angular framework). If you expect to use Amazon Simple Storage Service, you should create a bucket, create a user, and add permissions to access the created bucket.
 
-If you run an Angular, React, Vue, or jQuery example, you need to also run a .NET-based backend project - **Amazon_Backend**. To connect this project to an Amazon S3 server, you need to specify Amazon credentials of the user created previously. You need to update the `AWS` section in [appsettings.json](Amazon_Backend/appsettings.json):
+**IMPORTANT**
+
+The code snippets in this repository are for informational purposes only. Security should be your #1 priority when using Amazon S3 storage. You should consult a security expert or apply accepted best practices to maintain the highest security posture for your DevExtreme-powered web application. Remember, a secure web app demands careful consideration/understanding of potential attack vectors, the configuration of your development environment, and security posture of third-party service providers.
+
+If running our Angular, React, Vue, or jQuery example, you need to also run our .NET-based backend project - **Amazon_Backend**. To connect this project to an Amazon S3 server, you need to specify Amazon credentials of the user created previously. You will also need to update the AWS section in [appsettings.json](Amazon_Backend/appsettings.json):
 
 ```json
 "AWS": {
