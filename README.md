@@ -1,5 +1,4 @@
 <!-- default badges list -->
-![](https://img.shields.io/endpoint?url=https://codecentral.devexpress.com/api/v1/VersionRange/782922866/23.1.3%2B)
 [![](https://img.shields.io/badge/Open_in_DevExpress_Support_Center-FF7200?style=flat-square&logo=DevExpress&logoColor=white)](https://supportcenter.devexpress.com/ticket/details/T1226606)
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
@@ -13,7 +12,7 @@ This example uses a custom file provider to connect the FileManager component to
 
 The code snippets in this repository are for informational purposes only. Security should be your #1 priority when using Amazon S3 storage. You should consult a security expert or apply accepted best practices to maintain the highest security posture for your DevExtreme-powered web application. Remember, a secure web app demands careful consideration/understanding of potential attack vectors, the configuration of your development environment, and security posture of third-party service providers.
 
-If running our Angular, React, Vue, or jQuery example, you need to also run our .NET-based backend project - **Amazon_Backend**. To connect this project to an Amazon S3 server, you need to specify Amazon credentials of the user created previously. You will also need to update the AWS section in [appsettings.json](Amazon_Backend/appsettings.json):
+If running our Angular, React, Vue, or jQuery example, you need to also run our .NET-based backend project - **Amazon_Backend**. To connect this project to an Amazon S3 server, you need to specify Amazon credentials of the user created previously. You will also need to update the AWS section in [appsettings.json](Amazon_Backend/AmazonS3_Backend/appsettings.json):
 
 ```json
 "AWS": {
@@ -47,7 +46,7 @@ If running our Angular, React, Vue, or jQuery example, you need to also run our 
 
 ## More Examples
 
-- [File Manager for DevExtreme - Direct Upload to Amazon](https://github.com/DevExpress-Examples/devextreme-file-manager-direct-upload-to-amazon)
+- [File Manager for DevExtreme - Direct Upload to Amazon](https://github.com/DevExpress-Examples/devextreme-file-uploader-direct-upload-to-amazon)
 - [FileManager for DevExtreme - Azure Server-Side Binding](https://github.com/DevExpress-Examples/devextreme-file-manager-azure-server-side-binding)
 - [FileUploader for DevExtreme - Direct Upload to Azure](https://github.com/DevExpress-Examples/devextreme-file-uploader-direct-upload-to-azure)
 <!-- feedback -->
