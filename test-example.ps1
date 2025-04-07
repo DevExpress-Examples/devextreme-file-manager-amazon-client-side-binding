@@ -17,17 +17,29 @@ function Install-Packages {
         [string[]]$packages,
         [string]$buildVersion
     )
+
     Write-Output "`nInstalling packages in folder: $folderName"
     
+    # Uninstall existing packages first to avoid peer dependency conflicts
+    Write-Output "`nUninstalling existing packages: $($packages -join ", ")"
+    npm uninstall @($packages)
+    if (-not $?) {
+        Write-Error "`nERROR: Failed to uninstall packages in $folderName"
+        throw "Uninstallation failed in $folderName"
+    }
+
+    # Create package@version list
     $packageList = $packages | ForEach-Object { "$_@$buildVersion" }
     Write-Output "`nPackages to install: $($packageList -join ", ")"
-    # TODO: Uninstall DevExtreme packages to avoid potential peer-dependency issues
+
+    # Install specific versions
     npm install @($packageList) --save --save-exact --no-fund
     if (-not $?) {
         Write-Error "`nERROR: Failed to install DevExtreme packages in $folderName"
         throw "Installation failed in $folderName"
     }
 }
+
 
 function Build-Project {
     param (
