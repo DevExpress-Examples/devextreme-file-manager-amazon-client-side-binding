@@ -25,7 +25,7 @@ function Install-Packages {
         $packageWithVersion = "$package@$buildVersion"
         Write-Output "Installing $packageWithVersion..."
 
-        npm install --save --save-exact --no-fund $packageWithVersion
+        npm ci --save --save-exact --no-fund $packageWithVersion
         if (-not $?) {
             Write-Error "`nERROR: Failed to install $packageWithVersion in $folderName"
             throw "Installation failed for $packageWithVersion in $folderName"
@@ -86,7 +86,7 @@ function Process-JavaScriptProjects {
         try {
             Install-Packages -folderName $folderName -packages $packages -buildVersion $buildVersion
             Write-Output "`nInstalling remaining packages in $folderName"
-            npm install --save --save-exact --no-fund --loglevel=error
+            npm ci --save --save-exact --no-fund --loglevel=error
             if (-not $?) {
                 throw "ERROR: Failed to install remaining packages in $folderName"
             }
