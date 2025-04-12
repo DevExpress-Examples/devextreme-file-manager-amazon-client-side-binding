@@ -85,8 +85,8 @@ function Process-JavaScriptProjects {
 
         try {
             Write-Output "`nRemoving node_modules & package-lock.json: $pwd.Path"
-            Remove-Item -Recurse -Force node_modules
-            Remove-Item -Force package-lock.json
+            Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
+            Remove-Item -Force package-lock.json -ErrorAction SilentlyContinue
             Install-Packages -folderName $folderName -packages $packages -buildVersion $buildVersion
             Write-Output "`nInstalling remaining packages in $folderName"
             npm install --save --save-exact --no-fund --loglevel=error
