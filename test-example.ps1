@@ -22,7 +22,7 @@ function Install-Packages {
 
     # Loop through each package and install it individually
     foreach ($package in $packages) {
-        $packageVersion = GetValidNpmVersion -PackageName $package -Version $buildVersion
+        $packageVersion = Get-ValidNpmVersion -PackageName $package -Version $buildVersion
         $packageWithVersion = "$package@$packageVersion"
         Write-Output "Installing $packageWithVersion..."
 
