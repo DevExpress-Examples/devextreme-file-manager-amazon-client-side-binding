@@ -25,6 +25,4 @@ http://localhost:3000/src/index.html
 
 You can learn more about jQuery API in the [jQuery documentation](https://api.jquery.com/).
 
-To get more help on DevExtreme submit an issue on [GitHub](https://github.com/DevExpress/devextreme/issues) or [Support Center](https://www.devexpress.com/Support/Center/Question/Create)
-
-
+To get more help on DevExtreme submit an issue in the [Support Center](https://www.devexpress.com/Support/Center/Question/Create)
