@@ -1,5 +1,5 @@
 import FileSystemItem from 'devextreme/file_management/file_system_item';
-import UploadInfo from 'devextreme/file_management/upload_info';
+import type UploadInfo from 'devextreme/file_management/upload_info';
 import { saveAs } from 'file-saver';
 
 import { AmazonGateway } from './amazon.gateway';

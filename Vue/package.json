@@ -15,7 +15,7 @@
     "devextreme": "24.2.3",
     "devextreme-vue": "24.2.3",
     "vue": "^3.2.45",
-    "file-saver": "2.0.5"
+    "file-saver": "2.0.5",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {

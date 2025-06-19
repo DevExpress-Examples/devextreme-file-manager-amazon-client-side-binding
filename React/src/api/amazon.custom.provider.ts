@@ -1,6 +1,6 @@
 import CustomFileSystemProvider from 'devextreme/file_management/custom_provider';
 import FileSystemItem from 'devextreme/file_management/file_system_item';
-import UploadInfo from 'devextreme/file_management/upload_info';
+import type UploadInfo from 'devextreme/file_management/upload_info';
 import FileSystemError from 'devextreme/file_management/error';
 
 import { AmazonGateway } from './amazon.gateway';
@@ -31,6 +31,7 @@ export class AmazonCustomProvider {
     this.fileSystemProvider = new CustomFileSystemProvider(options);
   }
 
+  /* eslint-disable space-before-function-paren */
   getItems = async (parentDirectory: FileSystemItem): Promise<FileSystemItem[]> => {
     try {
       return await this.amazon.getItems(parentDirectory.key);
@@ -103,6 +104,7 @@ export class AmazonCustomProvider {
       throw new Error(error.message);
     }
   };
+  /* eslint-enable space-before-function-paren */
 }
 
 export function getAmazonFileSystemProvider(endpointUrl: string, onRequestExecuted?: Function): CustomFileSystemProvider {
