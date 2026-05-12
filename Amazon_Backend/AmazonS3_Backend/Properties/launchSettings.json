@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "AmazonS3_Backend": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:2498;http://localhost:2499"
+    }
+  }
+}
