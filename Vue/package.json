@@ -1,6 +1,7 @@
 {
   "name": "vue-project",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -12,15 +13,13 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "devextreme": "^25.2.3",
-    "devextreme-vue": "^25.2.3",
-    "file-saver": "2.0.5",
+    "devextreme": "26.1.2-beta",
+    "devextreme-vue": "26.1.2-beta",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
-    "@types/file-saver": "2.0.7",
     "@types/jsdom": "^21.0.0",
     "@types/node": "^22.0.0",
     "@vitejs/plugin-vue": "^5.0.0",
@@ -40,6 +39,5 @@
     "vite": "^6.0.0",
     "vitest": "^2.0.0",
     "vue-tsc": "^2.0.0"
-  },
-  "type": "module"
+  }
 }
