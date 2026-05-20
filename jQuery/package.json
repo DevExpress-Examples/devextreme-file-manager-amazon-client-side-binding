@@ -1,6 +1,7 @@
 {
   "name": "dx-jquery",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "npm run lite",
     "build": "npm run lint",
@@ -25,10 +26,8 @@
   },
   "dependencies": {
     "browser-sync": "^3.0.2",
-    "devextreme": "^25.2.3",
-    "devextreme-dist": "^25.2.3",
-    "file-saver": "2.0.5",
+    "devextreme": "26.1.2-beta",
+    "devextreme-dist": "26.1.2-beta",
     "jquery": "^3.7.1"
-  },
-  "type": "module"
+  }
 }
