@@ -14,24 +14,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "devextreme": "^25.2.3",
-    "devextreme-react": "^25.2.3",
-    "file-saver": "2.0.5",
+    "devextreme": "26.1.2-beta",
+    "devextreme-react": "26.1.2-beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.4.3",
-    "@types/file-saver": "2.0.7",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.4.1",
