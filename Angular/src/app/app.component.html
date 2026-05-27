@@ -4,8 +4,8 @@
     [fileSystemProvider]="fileSystemProvider"
     [allowedFileExtensions]="allowedFileExtensions"
   >
-    <dxo-upload [chunkSize]="5242880"></dxo-upload>
-    <dxo-permissions
+    <dxo-file-manager-upload [chunkSize]="5242880"></dxo-file-manager-upload>
+    <dxo-file-manager-permissions
       [create]="true"
       [copy]="true"
       [move]="true"
@@ -14,7 +14,7 @@
       [upload]="true"
       [download]="true"
     >
-    </dxo-permissions>
+    </dxo-file-manager-permissions>
   </dx-file-manager>
   <div id="request-panel">
     <div class="request-info" *ngFor="let request of requests">
