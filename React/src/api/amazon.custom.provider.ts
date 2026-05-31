@@ -31,7 +31,6 @@ export class AmazonCustomProvider {
     this.fileSystemProvider = new CustomFileSystemProvider(options);
   }
 
-  /* eslint-disable space-before-function-paren */
   getItems = async (parentDirectory: FileSystemItem): Promise<FileSystemItem[]> => {
     try {
       return await this.amazon.getItems(parentDirectory.key);
