@@ -23,6 +23,7 @@
       <JSFiles Include="$(NodeModulesDir)devextreme-dist\js\dx.all.js" />
       <JSFiles Include="$(NodeModulesDir)devextreme-dist\js\dx.aspnet.mvc.js" />
       <JSFiles Include="$(NodeModulesDir)devextreme-aspnet-data\js\dx.aspnet.data.js" />
+      <JSFiles Include="$(NodeModulesDir)file-saver\dist\FileSaver.min.js" />
     </ItemGroup>
     <Copy SourceFiles="@(JSFiles)" DestinationFolder="$(WwwRootDir)js\" SkipUnchangedFiles="true" />
 
