@@ -78,7 +78,6 @@ export class AmazonCustomProvider {
       throw new FileSystemError(32767, item, error.message);
     }
   };
-  /* eslint-disable-next-line vue/max-len */
   uploadFileChunk = async(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
     try {
       await this.amazon.uploadFileChunk(fileData, uploadInfo, destinationDirectory);
@@ -95,7 +94,6 @@ export class AmazonCustomProvider {
       throw new FileSystemError(32767, item, error.message);
     }
   };
-  /* eslint-disable-next-line vue/max-len */
   abortFileUpload = async(fileData: File, uploadInfo: UploadInfo, destinationDirectory: FileSystemItem | undefined): Promise<void> => {
     try {
       await this.amazon.abortFileUpload(fileData, uploadInfo, destinationDirectory);
@@ -105,7 +103,6 @@ export class AmazonCustomProvider {
   };
 }
 
-/* eslint-disable-next-line vue/max-len */
 export function getAmazonFileSystemProvider(endpointUrl: string, onRequestExecuted?: Function): CustomFileSystemProvider {
   return new AmazonCustomProvider(endpointUrl, onRequestExecuted).fileSystemProvider;
 }
